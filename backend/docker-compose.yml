@@ -1,0 +1,16 @@
+version: "3.2"
+
+volumes:
+  clinic_web_data:
+
+services:
+  pos-db:
+    container_name: pos-db
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - "1433:1433"
+    volumes:
+      - clinic_web_data:/var/opt/mssql
+    environment:
+      SA_PASSWORD: "!@QW34ertyui"
+      ACCEPT_EULA: "Y"
