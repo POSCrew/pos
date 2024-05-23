@@ -18,7 +18,7 @@ dotnet run --project POS.Web
 
 database setup code in included in the docker compose file.
 
-simply go into the `backend` directory and execute this command:
+to run the database, simply go into the `backend` directory and execute this command:
 
 ```bash
 docker compose up -d
@@ -38,4 +38,10 @@ dotnet ef migrations add -s POS.Web -p POS.Infrastructure -c "POSDbContext" MIGR
 
 ```bash
 dotnet ef database update -s POS.Web -p POS.Infrastructure -c "POSDbContext"
+```
+
+## Remove database
+
+```bash
+dotnet ef database drop -s POS.Web -p POS.Infrastructure -c "POSDbContext"
 ```
