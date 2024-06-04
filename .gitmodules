@@ -1,0 +1,3 @@
+[submodule "frontend/ui-commons"]
+	path = frontend/ui-commons
+	url = https://github.com/OmidNejadabbasi/ui-commons.git
