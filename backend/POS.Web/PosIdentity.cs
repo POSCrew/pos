@@ -4,16 +4,24 @@ using POS.Infrastructure;
 
 public static class PosIdentity
 {
-    public const string Admin = "Admin";
-    public const string Seller = "Seller";
+    public const string AdminRoleName = "Admin";
+    public const string SellerRoleName = "Seller";
+    public const string AdminPolicy = "Admin";
+    public const string SellerOrAdminPolicy = "AdminSeller";
+    public const string ValidUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_";
 
     internal static void SetupAuthorization(this WebApplicationBuilder builder)
     {
         builder.Services.AddAuthorization(config =>
         {
-            config.AddPolicy(PosIdentity.Admin, policy =>
+            config.AddPolicy(AdminPolicy, policy =>
             {
-                policy.RequireRole(PosIdentity.Admin);
+                policy.RequireRole(AdminRoleName);
+            });
+
+            config.AddPolicy(SellerOrAdminPolicy, policy =>
+            {
+                policy.RequireRole(SellerRoleName, AdminRoleName);
             });
         });
     }
@@ -27,7 +35,7 @@ public static class PosIdentity
             options.SignIn.RequireConfirmedEmail = false;
             options.SignIn.RequireConfirmedAccount = false;
             options.User.RequireUniqueEmail = false;
-            options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            options.User.AllowedUserNameCharacters = ValidUserNameCharacters;
             options.Lockout.MaxFailedAccessAttempts = 1000;
             options.Lockout.AllowedForNewUsers = false;
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(20);
