@@ -1,7 +1,7 @@
 using System.Net;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage;
 using POS.Application.Data;
 using POS.Infrastructure;
 
@@ -14,18 +14,75 @@ public static class UserEndponits
         var users = routes.MapGroup("users");
         users.MapPost("login", Login);
         users.MapPost("registerAdmin", RegisterAdmin);
-        users.MapGet("restricted", Restricted).RequireAuthorization();
-        users.MapGet("restrictedAdmin", RestrictedAdmin).RequireAuthorization(PosIdentity.Admin);
+        users.MapPost("changePassword", ChangePassword).RequireAuthorization();
+        users.MapPost("CreateSeller", CreateSeller).RequireAuthorization(PosIdentity.AdminPolicy);
     }
 
-    private static IResult RestrictedAdmin(HttpContext context)
+    private sealed record CreateSellerRequest(string? FirstName, string? LastName, string? UserName, string? PhoneNumber);
+    private static async Task<IResult> CreateSeller(
+        [FromServices] UserManager<IdentityUser> userManager,
+        [FromServices] IRepository<IdentityUser> userRepo,
+        [FromServices] POSDbContext context,
+        [FromBody] CreateSellerRequest request
+    )
     {
-        return Results.Ok("OK");
+        var username = request.UserName?.Trim() ?? string.Empty;
+        var firstName = request.FirstName?.Trim() ?? string.Empty; // TODO: create a user model that contains this
+        var lastName = request.LastName?.Trim() ?? string.Empty; // TODO: create a user model that contains this
+        var phoneNumber = request.PhoneNumber?.Trim() ?? string.Empty;
+
+        if(username.Any(c => !PosIdentity.ValidUserNameCharacters.Contains(c)))
+            return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: $"invalid username provided");
+
+        using var transaction = await context.Database.BeginTransactionAsync();
+        
+        if (userRepo.Set.Any(u => u.UserName == username))
+            return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "user already exists");
+
+        var randomPassword = GenerateRandomPassword();
+
+        var user = new IdentityUser
+        {
+            UserName = username,
+            PhoneNumber = phoneNumber,
+        };
+
+        var res = await userManager.CreateAsync(user, randomPassword);
+        if (!res.Succeeded)
+            return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "could not create the user",
+                detail: res.Errors.Select(e => $"{e.Code}: {e.Description}").Aggregate((a, b) => a + '\n' + b));
+
+        res = await userManager.AddToRoleAsync(user, PosIdentity.SellerRoleName);
+        if (!res.Succeeded)
+            return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "could not create the user",
+                detail: res.Errors.Select(e => $"{e.Code}: {e.Description}").Aggregate((a, b) => a + '\n' + b));
+
+        await transaction.CommitAsync();
+        return Results.Ok(new { Password = randomPassword });
     }
 
-    private static IResult Restricted(HttpContext context)
+    private sealed record ChangePasswordRequest(string? PreviousPassword, string? NewPassword);
+    private static async Task<IResult> ChangePassword(
+        [FromServices] UserManager<IdentityUser> userManager,
+        [FromServices] IHttpContextAccessor contextAccessor,
+        [FromServices] IRepository<IdentityUser> userRepo,
+        [FromBody] ChangePasswordRequest request
+    )
     {
-        return Results.Ok("OK");
+        var previousPassword = request.PreviousPassword?.Trim() ?? string.Empty;
+        var newPassword = request.NewPassword?.Trim() ?? string.Empty;
+
+        var username = contextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+        var user = userRepo.Set.FirstOrDefault(u => u.UserName == username);
+
+        if(user is null)
+            return Results.Problem(statusCode: (int)HttpStatusCode.NotFound, title: "user not found");
+
+        var result = await userManager.ChangePasswordAsync(user, previousPassword, newPassword);
+        if (!result.Succeeded)
+            return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "changing password failed");
+        
+        return Results.Ok();
     }
 
     private sealed record LoginRequest(string? UserName, string? Password);
@@ -64,9 +121,9 @@ public static class UserEndponits
         using var transaction = await context.Database.BeginTransactionAsync();
 
         if (userRepo.Set.Any(u => u.UserName == "admin"))
-            return Results.Problem(statusCode: 400, title: "admin user already exists");
+            return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "admin user already exists");
 
-        var randomPassword = "1234"; // TODO: randomly generate a password
+        var randomPassword = GenerateRandomPassword();
 
         var user = new IdentityUser
         {
@@ -75,15 +132,22 @@ public static class UserEndponits
 
         var res = await userManager.CreateAsync(user, randomPassword);
         if (!res.Succeeded)
-            return Results.Problem(statusCode: 400, title: "could not create admin user",
+            return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "could not create admin user",
                 detail: res.Errors.Select(e => $"{e.Code}: {e.Description}").Aggregate((a, b) => a + '\n' + b));
 
-        res = await userManager.AddToRoleAsync(user, PosIdentity.Admin);
+        res = await userManager.AddToRoleAsync(user, PosIdentity.AdminRoleName);
         if (!res.Succeeded)
-            return Results.Problem(statusCode: 400, title: "could not create admin user",
+            return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "could not create admin user",
                 detail: res.Errors.Select(e => $"{e.Code}: {e.Description}").Aggregate((a, b) => a + '\n' + b));
 
         await transaction.CommitAsync();
         return Results.Ok(new { Password = randomPassword });
+    }
+
+    private static string GenerateRandomPassword()
+    {
+        Span<byte> bytes = stackalloc byte[4];
+        RandomNumberGenerator.Fill(bytes);
+        return BitConverter.ToInt32(bytes).ToString("x");
     }
 }
