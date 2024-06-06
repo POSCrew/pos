@@ -2,8 +2,7 @@ using System.Net;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using POS.Application.Data;
-using POS.Infrastructure;
+using POS.Application.Abstractions.Data;
 
 namespace POS.Web.Users;
 
@@ -20,28 +19,28 @@ public static class UserEndponits
 
     private sealed record CreateSellerRequest(string? FirstName, string? LastName, string? UserName, string? PhoneNumber);
     private static async Task<IResult> CreateSeller(
-        [FromServices] UserManager<IdentityUser> userManager,
-        [FromServices] IRepository<IdentityUser> userRepo,
-        [FromServices] POSDbContext context,
+        [FromServices] UserManager<POSUser> userManager,
+        [FromServices] IRepository<POSUser> userRepo,
+        [FromServices] ITransactionManager transactionManager,
         [FromBody] CreateSellerRequest request
     )
     {
         var username = request.UserName?.Trim() ?? string.Empty;
-        var firstName = request.FirstName?.Trim() ?? string.Empty; // TODO: create a user model that contains this
-        var lastName = request.LastName?.Trim() ?? string.Empty; // TODO: create a user model that contains this
+        var firstName = request.FirstName?.Trim() ?? string.Empty;
+        var lastName = request.LastName?.Trim() ?? string.Empty;
         var phoneNumber = request.PhoneNumber?.Trim() ?? string.Empty;
 
         if(username.Any(c => !PosIdentity.ValidUserNameCharacters.Contains(c)))
             return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: $"invalid username provided");
 
-        using var transaction = await context.Database.BeginTransactionAsync();
+        using var transaction = await transactionManager.BeginTransactionAsync();
         
         if (userRepo.Set.Any(u => u.UserName == username))
             return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "user already exists");
 
         var randomPassword = GenerateRandomPassword();
 
-        var user = new IdentityUser
+        var user = new POSUser
         {
             UserName = username,
             PhoneNumber = phoneNumber,
@@ -63,9 +62,9 @@ public static class UserEndponits
 
     private sealed record ChangePasswordRequest(string? PreviousPassword, string? NewPassword);
     private static async Task<IResult> ChangePassword(
-        [FromServices] UserManager<IdentityUser> userManager,
+        [FromServices] UserManager<POSUser> userManager,
         [FromServices] IHttpContextAccessor contextAccessor,
-        [FromServices] IRepository<IdentityUser> userRepo,
+        [FromServices] IRepository<POSUser> userRepo,
         [FromBody] ChangePasswordRequest request
     )
     {
@@ -87,8 +86,8 @@ public static class UserEndponits
 
     private sealed record LoginRequest(string? UserName, string? Password);
     private static async Task<IResult> Login(
-        [FromServices] SignInManager<IdentityUser> signInManager,
-        [FromServices] IRepository<IdentityUser> userRepo,
+        [FromServices] SignInManager<POSUser> signInManager,
+        [FromServices] IRepository<POSUser> userRepo,
         [FromBody] LoginRequest loginRequest
     )
     {
@@ -113,19 +112,19 @@ public static class UserEndponits
     }
 
     private static async Task<IResult> RegisterAdmin(
-        [FromServices] UserManager<IdentityUser> userManager,
-        [FromServices] IRepository<IdentityUser> userRepo,
-        [FromServices] POSDbContext context
+        [FromServices] UserManager<POSUser> userManager,
+        [FromServices] IRepository<POSUser> userRepo,
+        [FromServices] ITransactionManager transactionManager
     )
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        using var transaction = await transactionManager.BeginTransactionAsync();
 
         if (userRepo.Set.Any(u => u.UserName == "admin"))
             return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "admin user already exists");
 
         var randomPassword = GenerateRandomPassword();
 
-        var user = new IdentityUser
+        var user = new POSUser
         {
             UserName = "admin",
         };

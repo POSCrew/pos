@@ -28,7 +28,7 @@ public static class PosIdentity
 
     internal static void SetupAuthentication(this WebApplicationBuilder builder)
     {
-        builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+        builder.Services.AddIdentity<POSUser, IdentityRole>(options =>
         {
             // TODO: these settings are only for development
             options.SignIn.RequireConfirmedPhoneNumber = false;

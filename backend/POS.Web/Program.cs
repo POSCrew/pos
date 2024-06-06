@@ -1,4 +1,6 @@
 using POS.Infrastructure;
+using POS.Application;
+using POS.Web.Inventory;
 using POS.Web.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,7 @@ builder
     });
 
 builder.Services.RegisterInfrastructureServices();
+builder.Services.RegisterApplicationServices();
 
 var app = builder.Build();
 
@@ -52,6 +55,7 @@ app.UseCors("POSLocalFrontEnd");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.AddInventoryEndpoints();
 app.AddUserEndpoints();
 
 app.Run();
