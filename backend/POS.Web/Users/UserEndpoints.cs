@@ -15,6 +15,7 @@ public static class UserEndponits
         users.MapPost("login", Login);
         users.MapPost("registerAdmin", RegisterAdmin);
         users.MapPost("changePassword", ChangePassword).RequireAuthorization();
+        users.MapGet("me", GetCurrentUser).RequireAuthorization();
         users.MapPost("CreateSeller", CreateSeller).RequireAuthorization(PosIdentity.AdminPolicy);
     }
 
@@ -83,6 +84,18 @@ public static class UserEndponits
             return Results.Problem(statusCode: (int)HttpStatusCode.BadRequest, title: "changing password failed");
         
         return Results.Ok();
+    }
+
+    private static IResult GetCurrentUser([FromServices] UserManager<IdentityUser> userManager,
+        [FromServices] IHttpContextAccessor contextAccessor,
+        [FromServices] IRepository<IdentityUser> userRepo)
+    {
+        var username = contextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+        var user = userRepo.Set.FirstOrDefault(u => u.UserName == username);
+
+        if(user is null)
+            return Results.Problem(statusCode: (int)HttpStatusCode.NotFound, title: "user not found");
+        return Results.Ok(user);
     }
 
     private sealed record LoginRequest(string? UserName, string? Password);
