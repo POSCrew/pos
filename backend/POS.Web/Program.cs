@@ -5,22 +5,33 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSqlServer<POSDbContext>(builder.Configuration.GetConnectionString("POSConnectionString"));
+builder
+    .Services
+    .AddSqlServer<POSDbContext>(builder.Configuration.GetConnectionString("POSConnectionString"));
 
 builder.SetupAuthorization();
 builder.SetupAuthentication();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: "POSLocalFrontEnd",
-        policy  =>
-        {
-            policy.WithOrigins(
-                "http://localhost:5076",
-                "http://localhost:5000",
-                "http://127.0.0.1:5000");
-        });
-});
+builder
+    .Services
+    .AddCors(options =>
+    {
+        options.AddPolicy(
+            name: "POSLocalFrontEnd",
+            policy =>
+            {
+                policy
+                    .WithOrigins(
+                        "http://localhost:5076",
+                        "http://localhost:5008",
+                        "http://127.0.0.1:5008"
+                    )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            }
+        );
+    });
 
 builder.Services.RegisterInfrastructureServices();
 

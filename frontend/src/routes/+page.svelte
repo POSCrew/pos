@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Http, serverUrl } from "$lib/http";
-  import { TextField, Button, Space } from "ui-commons";
+  import { TextField, Button, Space, DialogUtils } from "ui-commons";
 
   const http = Http.get();
   let password, username;
@@ -12,9 +12,18 @@
       console.log(res);
     });
   }
+  function createAdmin() {
+    http.post("/users/registerAdmin", null).then((res) => {
+      DialogUtils.message(`Username: admin,  Password: ${res.data.Password}`);
+    });
+  }
 </script>
 
-<div class="border m-auto my-12 w-[50%] py-14 px-14 md:px-36">
+<div class="border m-auto my-12 lg:w-[50%] w-[75%] py-14 px-14 lg:px-36">
+  <Button on:click={createAdmin} borderColor="gray" borderThickness="1"
+    >Create Admin User</Button
+  >
+
   <TextField
     type="text"
     label="Username"
