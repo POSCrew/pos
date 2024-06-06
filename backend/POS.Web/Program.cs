@@ -10,6 +10,18 @@ builder.Services.AddSqlServer<POSDbContext>(builder.Configuration.GetConnectionS
 builder.SetupAuthorization();
 builder.SetupAuthentication();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "POSLocalFrontEnd",
+        policy  =>
+        {
+            policy.WithOrigins(
+                "http://localhost:5076",
+                "http://localhost:5000",
+                "http://127.0.0.1:5000");
+        });
+});
+
 builder.Services.RegisterInfrastructureServices();
 
 var app = builder.Build();
@@ -20,12 +32,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
+app.UseCors("POSLocalFrontEnd");
 app.UseAuthentication();
 app.UseAuthorization();
-
-//app.MapIdentityApi<IdentityUser>();
 
 app.AddUserEndpoints();
 
