@@ -1,27 +1,33 @@
 <script lang="ts">
-  import { serverUrl } from "$lib/http";
-  import { TextField, Button } from "ui-commons";
+  import { Http, serverUrl } from "$lib/http";
+  import { TextField, Button, Space } from "ui-commons";
 
-  let password, email;
+  const http = Http.get();
+  let password, username;
 
-  function login(){
-
+  function login() {
+    let loginReq = { password, username };
+    console.log();
+    http.post("/users/login", loginReq).then((res) => {
+      console.log(res);
+    });
   }
 </script>
 
-<div class="border m-8"></div>
-<h2>{serverUrl}</h2>
-<TextField
-  type="text"
-  label="Username"
-  placeholder="Username"
-  bind:value={email}
-/>
+<div class="border m-auto my-12 w-[50%] py-14 px-14 md:px-36">
+  <TextField
+    type="text"
+    label="Username"
+    placeholder="Username"
+    bind:value={username}
+  />
 
-<TextField
-  type="password"
-  label="Password"
-  placeholder="Enter yout password:"
-  bind:value={password}
-/>
-<Button on:click={login}>Login</Button>
+  <TextField
+    type="password"
+    label="Password"
+    placeholder="Enter yout password:"
+    bind:value={password}
+  />
+  <div class="h-2"></div>
+  <Button on:click={login} borderColor="gray" borderThickness="1">Login</Button>
+</div>
