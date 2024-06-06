@@ -1,5 +1,8 @@
 using POS.Infrastructure;
+using POS.Application;
+using POS.Web.Inventory;
 using POS.Web.Users;
+using POS.Application.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +36,10 @@ builder
         );
     });
 
+builder.Services.AddExceptionHandler<POSExceptionHandler>();
+builder.Services.AddProblemDetails();
 builder.Services.RegisterInfrastructureServices();
+builder.Services.RegisterApplicationServices();
 
 var app = builder.Build();
 
@@ -52,6 +58,8 @@ app.UseCors("POSLocalFrontEnd");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseExceptionHandler();
+app.AddInventoryEndpoints();
 app.AddUserEndpoints();
 
 app.Run();

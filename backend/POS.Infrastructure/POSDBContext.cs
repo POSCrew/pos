@@ -7,7 +7,7 @@ using POS.Core.Inventory;
 
 namespace POS.Infrastructure;
 
-public sealed class POSDbContext : IdentityDbContext<IdentityUser>
+public sealed class POSDbContext : IdentityDbContext<POSUser>
 {
     public POSDbContext(DbContextOptions<POSDbContext> options)
         : base(options)
