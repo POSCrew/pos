@@ -9,5 +9,6 @@ public static class ApplicationServiceRegistry
     public static void RegisterApplicationServices(this IServiceCollection services)
     {
         services.AddTransient<IItemService, ItemService>();
+        services.AddTransient<IVendorService, VendorService>();
     }
 }

@@ -53,7 +53,8 @@ public sealed class ItemService : IItemService
     {
         item.Title = item.Title?.Trim() ?? string.Empty;
         item.Serial = item.Serial?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(item.Title)) throw new ArgumentException($"{nameof(Item)}.{nameof(Item.Title)} is required");
+        if (string.IsNullOrWhiteSpace(item.Title))
+            throw new POSException("item.title is required");
     }
 
     private void ValidateInTransaction(Item item)

@@ -7,6 +7,7 @@ public sealed class Customer : Party
     public static Customer DefaultCustomer = new Customer
     {
         ID = -1,
+        Code = "0",
         FirstName = "مشتری پیش فرض"
     };
 }

@@ -4,7 +4,7 @@ using POS.Core.Inventory;
 
 namespace POS.Web.Inventory;
 
-public static class ItemEndponits
+public static class ItemEndpoints
 {
     public static void AddItemEndpoints(this IEndpointRouteBuilder routes)
     {
