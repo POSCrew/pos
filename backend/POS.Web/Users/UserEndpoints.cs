@@ -7,11 +7,12 @@ using POS.Application.Abstractions.Data;
 
 namespace POS.Web.Users;
 
-public static class UserEndponits
+public static class UserEndpoints
 {
     public static void AddUserEndpoints(this IEndpointRouteBuilder routes)
     {
-        var users = routes.MapGroup("users");
+        var users = routes.MapGroup("users")
+            .AddEndpointFilter(RequiresInitializationFilter.Instance);
         users.MapPost("login", Login);
         users.MapPost("registerAdmin", RegisterAdmin);
         users.MapPost("changePassword", ChangePassword).RequireAuthorization();

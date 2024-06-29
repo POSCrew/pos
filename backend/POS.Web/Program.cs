@@ -42,6 +42,10 @@ builder.Services.AddProblemDetails();
 builder.Services.RegisterInfrastructureServices();
 builder.Services.RegisterApplicationServices();
 
+#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
+IGeneralService.IsStoreInitialized = await builder.Services.BuildServiceProvider().GetRequiredService<IGeneralService>().GetIsStoreInitializedFromDb();
+#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -62,6 +66,7 @@ app.UseAuthorization();
 app.UseExceptionHandler();
 app.AddInventoryEndpoints();
 app.AddSalesEndpoints();
+app.AddGeneralEndpoints();
 app.AddUserEndpoints();
 
 app.Run();

@@ -8,7 +8,8 @@ public static class ItemEndpoints
 {
     public static void AddItemEndpoints(this IEndpointRouteBuilder routes)
     {
-        var items = routes.MapGroup("items");
+        var items = routes.MapGroup("items")
+            .AddEndpointFilter(RequiresInitializationFilter.Instance);
         items.MapPost("/", Create);
         items.MapPut("/", Update);
         items.MapDelete("/", Remove);

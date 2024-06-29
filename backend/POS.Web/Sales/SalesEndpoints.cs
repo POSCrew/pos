@@ -1,6 +1,6 @@
 namespace POS.Web.Sales;
 
-public static class SalesEndponits
+public static class SalesEndpoints
 {
     public static void AddSalesEndpoints(this IEndpointRouteBuilder routes)
     {

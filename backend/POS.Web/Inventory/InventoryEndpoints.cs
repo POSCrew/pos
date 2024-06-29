@@ -1,6 +1,6 @@
 namespace POS.Web.Inventory;
 
-public static class InventoryEndponits
+public static class InventoryEndpoints
 {
     public static void AddInventoryEndpoints(this IEndpointRouteBuilder routes)
     {
