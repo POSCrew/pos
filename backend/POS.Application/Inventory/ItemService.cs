@@ -68,15 +68,15 @@ public sealed class ItemService : IItemService
 
     public Task<Item?> GetByID(int id)
     {
-        return _repository.Set.Where(i => i.ID == id).FirstOrDefaultAsync();
+        return _repository.Set.Where(i => i.ID == id).AsNoTracking().FirstOrDefaultAsync();
     }
 
     public Task<List<Item>> GetAll(int? page, int? pageSize)
     {
         if (page is null || pageSize is null || page < 0 || pageSize < 1)
-            return _repository.Set.ToListAsync();
+            return _repository.Set.AsNoTracking().ToListAsync();
 
-        return _repository.Set.Skip(page.Value * pageSize.Value).Take(pageSize.Value).ToListAsync();
+        return _repository.Set.Skip(page.Value * pageSize.Value).Take(pageSize.Value).AsNoTracking().ToListAsync();
     }
 
     public Task<int> GetCount()

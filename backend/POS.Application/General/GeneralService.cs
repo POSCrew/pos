@@ -7,6 +7,8 @@ namespace POS.Application.General;
 
 public sealed class GeneralService : IGeneralService
 {
+    private static Store? StoreInfo = null;
+
     private readonly ITransactionManager _transactionManager;
     private readonly IRepository<Store> _repository;
 
@@ -53,8 +55,8 @@ public sealed class GeneralService : IGeneralService
         return store;
     }
 
-    public Task<Store> GetStoreInfo()
+    public async Task<Store> GetStoreInfo()
     {
-        return _repository.Set.FirstAsync();
+        return StoreInfo ??= await _repository.Set.AsNoTracking().FirstAsync();
     }
 }

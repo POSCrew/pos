@@ -14,5 +14,6 @@ public static class ApplicationServiceRegistry
         services.AddTransient<IItemService, ItemService>();
         services.AddTransient<IVendorService, VendorService>();
         services.AddTransient<ICustomerService, CustomerService>();
+        services.AddTransient<IPurchaseInvoiceService, PurchaseInvoiceService>();
     }
 }
