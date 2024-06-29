@@ -22,22 +22,47 @@ public sealed class ItemService : IItemService
 
         item.ID = 0;
 
-        item.Title = item.Title?.Trim() ?? string.Empty;
-        item.Serial = item.Serial?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(item.Title)) throw new ArgumentException($"{nameof(Item)}.{nameof(Item.Title)} is required");
+        Validate(item);
 
         using var transaction = await _transactionManager.BeginTransactionAsync();
 
-        if (_repository.Set.Any(i => i.Title == item.Title))
-            throw new POSException("another item with this title already exists");
-
-        if (item.Serial.Length > 0 && _repository.Set.Any(i => i.Serial == item.Serial))
-            throw new POSException("another item with this serial already exists");
+        ValidateInTransaction(item);
 
         _repository.Add(item);
         await _repository.SaveChangesAsync();
         await transaction.CommitAsync();
         return item;
+    }
+
+    public async Task<Item> Update(Item item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        Validate(item);
+
+        using var transaction = await _transactionManager.BeginTransactionAsync();
+        ValidateInTransaction(item);
+
+        _repository.Update(item);
+        await _repository.SaveChangesAsync();
+        await transaction.CommitAsync();
+        return item;
+    }
+
+    private void Validate(Item item)
+    {
+        item.Title = item.Title?.Trim() ?? string.Empty;
+        item.Serial = item.Serial?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(item.Title)) throw new ArgumentException($"{nameof(Item)}.{nameof(Item.Title)} is required");
+    }
+
+    private void ValidateInTransaction(Item item)
+    {
+        if (_repository.Set.Any(i => i.Title == item.Title && (i.ID != item.ID || item.ID == 0)))
+            throw new POSException("another item with this title already exists");
+
+        if (item.Serial.Length > 0 && _repository.Set.Any(i => i.Serial == item.Serial && (i.ID != item.ID || item.ID == 0)))
+            throw new POSException("another item with this serial already exists");
     }
 
     public Task<Item?> GetByID(int id)

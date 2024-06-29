@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Mvc;
 using POS.Application.Abstractions;
 using POS.Core.Inventory;
@@ -11,6 +10,7 @@ public static class ItemEndponits
     {
         var items = routes.MapGroup("items");
         items.MapPost("/", Create);
+        items.MapPut("/", Update);
         items.MapDelete("/", Remove);
         items.MapGet("/", GetByID);
         items.MapGet("all", GetAll);
@@ -31,6 +31,15 @@ public static class ItemEndponits
     )
     {
         await itemService.Create(item);
+        return item;
+    }
+
+    private static async Task<Item> Update(
+        [FromServices] IItemService itemService,
+        [FromBody] Item item
+    )
+    {
+        await itemService.Update(item);
         return item;
     }
 
