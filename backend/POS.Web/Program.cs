@@ -2,6 +2,7 @@ using POS.Application;
 using POS.Application.Abstractions;
 using POS.Infrastructure;
 using POS.Web.Inventory;
+using POS.Web.Sales;
 using POS.Web.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -60,6 +61,7 @@ app.UseAuthorization();
 
 app.UseExceptionHandler();
 app.AddInventoryEndpoints();
+app.AddSalesEndpoints();
 app.AddUserEndpoints();
 
 app.Run();

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using POS.Application.Abstractions;
 using POS.Application.Inventory;
+using POS.Application.Sales;
 
 namespace POS.Application;
 
@@ -10,5 +11,6 @@ public static class ApplicationServiceRegistry
     {
         services.AddTransient<IItemService, ItemService>();
         services.AddTransient<IVendorService, VendorService>();
+        services.AddTransient<ICustomerService, CustomerService>();
     }
 }
