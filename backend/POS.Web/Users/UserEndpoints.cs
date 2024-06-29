@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ public static class UserEndponits
         users.MapPost("login", Login);
         users.MapPost("registerAdmin", RegisterAdmin);
         users.MapPost("changePassword", ChangePassword).RequireAuthorization();
-        users.MapGet("me", GetCurrentUser).RequireAuthorization();
+        users.MapGet("me", GetMe).RequireAuthorization();
         users.MapPost("CreateSeller", CreateSeller).RequireAuthorization(PosIdentity.AdminPolicy);
     }
 
@@ -85,16 +86,18 @@ public static class UserEndponits
         return Results.Ok();
     }
 
-    private static IResult GetCurrentUser([FromServices] UserManager<IdentityUser> userManager,
-        [FromServices] IHttpContextAccessor contextAccessor,
-        [FromServices] IRepository<IdentityUser> userRepo)
+    private static IResult GetMe(IHttpContextAccessor accessor)
     {
-        var username = contextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
-        var user = userRepo.Set.FirstOrDefault(u => u.UserName == username);
-
-        if(user is null)
-            return Results.Problem(statusCode: (int)HttpStatusCode.NotFound, title: "user not found");
-        return Results.Ok(user);
+        var username = accessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+        
+        var roles = accessor.HttpContext?.User.FindAll(ClaimTypes.Role).Select(r => r.Value);
+        return Results.Ok(
+            new
+            {
+                username,
+                roles
+            }
+        );
     }
 
     private sealed record LoginRequest(string? UserName, string? Password);

@@ -1,8 +1,8 @@
-using POS.Infrastructure;
 using POS.Application;
+using POS.Application.Abstractions;
+using POS.Infrastructure;
 using POS.Web.Inventory;
 using POS.Web.Users;
-using POS.Application.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 

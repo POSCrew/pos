@@ -1,22 +1,20 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import { Http, serverUrl } from "$lib/http";
   import { TextField, Button, Space, DialogUtils } from "ui-commons";
-
-  const http = Http.get();
+  import { sl } from "../../di";
+  import { AuthService, tAuthService } from "../../services/AuthService";
+  import { navigate } from "svelte-navigator";
+  let service: AuthService = sl.resolve(tAuthService);
   let password, username;
 
   function login() {
     let loginReq = { password, username };
     console.log();
-    http.post("/users/login", loginReq).then((res) => {
-      if (res.status === 200){
-        goto("/")
-      }
+    service.login(loginReq).then((res) => {
+      navigate("/");
     });
   }
   function createAdmin() {
-    http.post("/users/registerAdmin", null).then((res) => {
+    service.createAdmin().then((res) => {
       DialogUtils.message(`Username: admin,  Password: ${res.data.Password}`);
     });
   }
