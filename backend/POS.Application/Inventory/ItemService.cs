@@ -66,9 +66,13 @@ public sealed class ItemService : IItemService
             throw new POSException("another item with this serial already exists");
     }
 
-    public Task<Item?> GetByID(int id)
+    public Task<Item?> GetByID(int id, bool tracking = false)
     {
-        return _repository.Set.Where(i => i.ID == id).AsNoTracking().FirstOrDefaultAsync();
+        var items = _repository.Set.Where(i => i.ID == id);
+        if (!tracking)
+            items = items.AsNoTracking();
+
+        return items.FirstOrDefaultAsync();
     }
 
     public Task<List<Item>> GetAll(int? page, int? pageSize)

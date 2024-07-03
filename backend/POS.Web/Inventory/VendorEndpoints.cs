@@ -8,8 +8,7 @@ public static class VendorEndpoints
 {
     public static void AddVendorEndpoints(this IEndpointRouteBuilder routes)
     {
-        var vendors = routes.MapGroup("vendors")
-            .AddEndpointFilter(RequiresInitializationFilter.Instance);
+        var vendors = routes.MapGroup("vendors");
         vendors.MapPost("/", Create);
         vendors.MapPut("/", Update);
         vendors.MapDelete("/", Remove);

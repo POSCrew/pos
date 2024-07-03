@@ -73,9 +73,24 @@ public sealed class CustomerService : ICustomerService
             throw new POSException("another customer with this code already exists");
     }
 
-    public Task<Customer?> GetByID(int id)
+    public async Task<Customer?> GetByID(int id, bool tracking = false)
     {
-        return _repository.Set.Where(i => i.ID == id).AsNoTracking().FirstOrDefaultAsync();
+        var dc = Customer.DefaultCustomer;
+        if(id == dc.ID)
+        {
+            _repository.ChangeStateToUnchanged(dc);
+            return dc;
+        }
+
+        var customers = _repository.Set.Where(i => i.ID == id);
+        if(!tracking)
+            customers = customers.AsNoTracking();
+        var customer = await customers.FirstOrDefaultAsync();
+
+        if(customer is not null)
+            _repository.ChangeStateToUnchanged(customer);
+
+        return customer;
     }
 
     public Task<List<Customer>> GetAll(int? page, int? pageSize)

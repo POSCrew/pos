@@ -7,7 +7,7 @@ public sealed class PurchaseInvoice : BaseEntity
     public DateTime Date { get; set; }
     public int Number { get; set; }
     [DataType("DECIMAL(19, 4)")] public decimal TotalPrice { get; set; }
-    public Vendor Vendor { get; set; } = Vendor.DefaultVendor;
+    public Vendor Vendor { get; set; } = null!;
     public int CreatorID { get; set; }
     public List<PurchaseInvoiceItem> InvoiceItems { get; set; } = new List<PurchaseInvoiceItem>();
     // TODO: add concurrency stamp

@@ -57,22 +57,23 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         if (previousInvoice is null)
             throw new POSException("invoice not found");
 
-        previousInvoice.Number = invoice.Number ?? await GetMaxNumber();
+        previousInvoice.Number = invoice.Number ?? await GetMaxNumber() + 1;
         previousInvoice.Date = invoice.Date;
 
         await CheckDateAndNumber(previousInvoice.Date, previousInvoice.Number, previousInvoice.ID);
+        CheckRowNumbers(invoice.InvoiceItems);
 
         if (previousInvoice.Vendor.ID != (invoice.VendorId ?? -1))
             previousInvoice.Vendor = await GetVendor(invoice.VendorId);
 
         for (int i = previousInvoice.InvoiceItems.Count - 1; i >= 0; i--)
         {
-            if(!invoice.InvoiceItems.Any(ii => ii.ID == previousInvoice.InvoiceItems[i].ID))
+            if (!invoice.InvoiceItems.Any(ii => ii.ID == previousInvoice.InvoiceItems[i].ID))
                 previousInvoice.InvoiceItems.RemoveAt(i);
         }
 
         var total = 0m;
-        foreach(var item in invoice.InvoiceItems)
+        foreach (var item in invoice.InvoiceItems)
         {
             if (item.Price <= 0)
                 throw new POSException("invoice item price should be positive");
@@ -85,8 +86,8 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
             var previousItem = item.ID is null
                 ? null
                 : previousInvoice.InvoiceItems.FirstOrDefault(ii => ii.ID == item.ID);
-            
-            if(previousItem is null)
+
+            if (previousItem is null)
             {
                 previousInvoice.InvoiceItems.Add(new PurchaseInvoiceItem
                 {
@@ -116,11 +117,12 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         ArgumentNullException.ThrowIfNull(invoice.InvoiceItems);
 
         await CheckDateAndNumber(invoice.Date, invoice.Number);
+        CheckRowNumbers(invoice.InvoiceItems);
 
         var result = new PurchaseInvoice
         {
             Date = invoice.Date,
-            Number = invoice.Number ?? await GetMaxNumber(),
+            Number = invoice.Number ?? await GetMaxNumber() + 1,
             Vendor = await GetVendor(invoice.VendorId),
             CreatorID = userId,
             InvoiceItems = new List<PurchaseInvoiceItem>(invoice.InvoiceItems.Count)
@@ -159,9 +161,41 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
             throw new POSException("invoice number already exists");
     }
 
+    private void CheckRowNumbers(List<CreatePurchaseInvoiceItemRequest> invoiceItems)
+    {
+        Span<bool> rowNumbers = stackalloc bool[invoiceItems.Count];
+        for (int i = 0; i < invoiceItems.Count; i++)
+        {
+            if (invoiceItems[i].RowNumber > invoiceItems.Count
+                || invoiceItems[i].RowNumber < 1
+                || rowNumbers[invoiceItems[i].RowNumber - 1])
+            {
+                throw new POSException("wrong row numbers in invoice");
+            }
+
+            rowNumbers[invoiceItems[i].RowNumber - 1] = true;
+        }
+    }
+
+    private void CheckRowNumbers(List<UpdatePurchaseInvoiceItemRequest> invoiceItems)
+    {
+        Span<bool> rowNumbers = stackalloc bool[invoiceItems.Count];
+        for (int i = 0; i < invoiceItems.Count; i++)
+        {
+            if (invoiceItems[i].RowNumber > invoiceItems.Count
+                || invoiceItems[i].RowNumber < 1
+                || rowNumbers[invoiceItems[i].RowNumber - 1])
+            {
+                throw new POSException("wrong row numbers in invoice");
+            }
+
+            rowNumbers[invoiceItems[i].RowNumber - 1] = true;
+        }
+    }
+
     private async Task<Item> GetItem(int itemId)
     {
-        var item = await _itemService.GetByID(itemId);
+        var item = await _itemService.GetByID(itemId, true);
         if (item is null)
             throw new POSException("item not found");
 
@@ -170,10 +204,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
 
     private async Task<Vendor> GetVendor(int? vendorId)
     {
-        if (vendorId is null)
-            return Vendor.DefaultVendor;
-
-        var v = await _vendorService.GetByID(vendorId.Value);
+        var v = await _vendorService.GetByID(vendorId ?? -1, true);
         if (v is null)
             throw new POSException("vendor not found");
 
@@ -182,7 +213,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
 
     private async ValueTask<int> GetMaxNumber()
     {
-        return await _repository.Set.MaxAsync(i => i.Number);
+        return await _repository.Set.MaxAsync(i => (int?)i.Number) ?? 1;
     }
 
     public Task<PurchaseInvoice?> GetByID(int id)
@@ -203,9 +234,18 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         return _repository.Set.CountAsync();
     }
 
-    public Task Remove(int id)
+    public async Task Remove(int id)
     {
+        var invoice = await GetByID(id);
+        if(invoice is null)
+            throw new POSException("invalid id");
+
+        foreach(var item in invoice.InvoiceItems)
+        {
+            _itemRepository.Remove(item.ID);
+        }
+
         _repository.Remove(id);
-        return _repository.SaveChangesAsync();
+        await _repository.SaveChangesAsync();
     }
 }

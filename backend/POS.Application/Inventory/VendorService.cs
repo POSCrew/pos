@@ -73,9 +73,24 @@ public sealed class VendorService : IVendorService
             throw new POSException("another vendor with this code already exists");
     }
 
-    public Task<Vendor?> GetByID(int id)
+    public async Task<Vendor?> GetByID(int id, bool tracking = false)
     {
-        return _repository.Set.Where(i => i.ID == id).AsNoTracking().FirstOrDefaultAsync();
+        var dv = Vendor.DefaultVendor;
+        if(id == dv.ID)
+        {
+            _repository.ChangeStateToUnchanged(dv);
+            return dv;
+        }
+
+        var vendors = _repository.Set.Where(i => i.ID == id);
+        if(!tracking)
+            vendors = vendors.AsNoTracking();
+        var vendor = await vendors.FirstOrDefaultAsync();
+
+        if(vendor is not null)
+            _repository.ChangeStateToUnchanged(vendor);
+
+        return vendor;
     }
 
     public Task<List<Vendor>> GetAll(int? page, int? pageSize)
