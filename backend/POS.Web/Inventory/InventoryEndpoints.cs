@@ -1,12 +1,16 @@
 namespace POS.Web.Inventory;
 
-public static class InventoryEndponits
+public static class InventoryEndpoints
 {
     public static void AddInventoryEndpoints(this IEndpointRouteBuilder routes)
     {
         var inventory = routes.MapGroup("inventory")
-            .RequireAuthorization(PosIdentity.SellerOrAdminPolicy);
+            .RequireAuthorization(PosIdentity.SellerOrAdminPolicy)
+            .AddEndpointFilter<RequiresInitializationFilter>();
 
-        ItemEndponits.AddItemEndpoints(inventory);
+        ItemEndpoints.AddItemEndpoints(inventory);
+        VendorEndpoints.AddVendorEndpoints(inventory);
+        PurchaseInvoiceEndpoints.AddPurchaseInvoiceEndpoints(inventory);
+        InventoryReviewEndpoints.AddInventoryReviewEndpoints(inventory);
     }
 }

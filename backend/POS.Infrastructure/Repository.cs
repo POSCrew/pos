@@ -1,4 +1,5 @@
-﻿using POS.Application.Abstractions.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using POS.Application.Abstractions.Data;
 using POS.Core;
 
 namespace POS.Infrastructure;
@@ -39,5 +40,24 @@ public sealed class Repository<T> : IRepository<T>
     public Task SaveChangesAsync()
     {
         return _context.SaveChangesAsync();
+    }
+
+    public void ChangeStateToUnchanged(T vendor)
+    {
+        _context.Entry(vendor).State = EntityState.Unchanged;
+    }
+
+    public async Task<Tdto> ExecuteRawSqlScalar<Tdto>(FormattableString sql, Tdto defaultValue = default!)
+    {
+        var res = await ExecuteRawSql<Tdto>(sql);
+        if (res is null || res.Count == 0)
+            return defaultValue;
+
+        return res[0];
+    }
+
+    public async Task<List<Tdto>> ExecuteRawSql<Tdto>(FormattableString sql)
+    {
+        return await _context.Database.SqlQuery<Tdto>(sql).ToListAsync();
     }
 }

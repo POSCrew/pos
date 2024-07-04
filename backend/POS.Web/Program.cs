@@ -1,23 +1,19 @@
 using POS.Application;
-using POS.Application.Abstractions;
 using POS.Infrastructure;
 using POS.Web.Inventory;
+using POS.Web.Sales;
 using POS.Web.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder
-    .Services
-    .AddSqlServer<POSDbContext>(builder.Configuration.GetConnectionString("POSConnectionString"));
+builder.Services.AddSqlServer<POSDbContext>(builder.Configuration.GetConnectionString("POSConnectionString"));
 
 builder.SetupAuthorization();
 builder.SetupAuthentication();
 
-builder
-    .Services
-    .AddCors(options =>
+builder.Services.AddCors(options =>
     {
         options.AddPolicy(
             name: "POSLocalFrontEnd",
@@ -60,6 +56,8 @@ app.UseAuthorization();
 
 app.UseExceptionHandler();
 app.AddInventoryEndpoints();
+app.AddSalesEndpoints();
+app.AddGeneralEndpoints();
 app.AddUserEndpoints();
 
 app.Run();

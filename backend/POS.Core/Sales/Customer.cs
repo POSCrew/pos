@@ -4,9 +4,10 @@ namespace POS.Core.Sales;
 
 public sealed class Customer : Party
 {
-    public static Customer DefaultCustomer = new Customer
+    public static Customer DefaultCustomer => new()
     {
         ID = -1,
+        Code = "0",
         FirstName = "مشتری پیش فرض"
     };
 }

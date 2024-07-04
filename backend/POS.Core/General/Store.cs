@@ -1,8 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace POS.Core.General;
 
 public sealed class Store : BaseEntity
 {
-    public string Title { get; set; } = "";
-    public string Address { get; set; } = "";
+    [MaxLength(200)] public string Title { get; set; } = "";
+    [MaxLength(200)] public string Address { get; set; } = "";
     public DateTime InitializationDate { get; set; }
 }

@@ -7,11 +7,12 @@ using POS.Application.Abstractions.Data;
 
 namespace POS.Web.Users;
 
-public static class UserEndponits
+public static class UserEndpoints
 {
     public static void AddUserEndpoints(this IEndpointRouteBuilder routes)
     {
-        var users = routes.MapGroup("users");
+        var users = routes.MapGroup("users")
+            .AddEndpointFilter<RequiresInitializationFilter>();
         users.MapPost("login", Login);
         users.MapPost("registerAdmin", RegisterAdmin);
         users.MapPost("changePassword", ChangePassword).RequireAuthorization();
@@ -86,14 +87,15 @@ public static class UserEndponits
         return Results.Ok();
     }
 
-    private static IResult GetMe(IHttpContextAccessor accessor)
+    private static IResult GetMe(ClaimsPrincipal user)
     {
-        var username = accessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+        var username = user?.Identity?.Name ?? string.Empty;
         
-        var roles = accessor.HttpContext?.User.FindAll(ClaimTypes.Role).Select(r => r.Value);
+        var roles = user?.FindAll(ClaimTypes.Role).Select(r => r.Value);
         return Results.Ok(
             new
             {
+                id = user?.FindFirstValue(ClaimTypes.NameIdentifier),
                 username,
                 roles
             }
@@ -116,7 +118,7 @@ public static class UserEndponits
         var user = userRepo.Set.FirstOrDefault(u => u.UserName == username);
 
         if (user is null)
-            return Results.Problem(statusCode: (int)HttpStatusCode.NotFound, title: "user not found");
+            return Results.Problem(statusCode: (int)HttpStatusCode.NotFound, title: "invalid id");
 
         var result = await signInManager.CheckPasswordSignInAsync(user, password, true);
         if (!result.Succeeded)
