@@ -1,4 +1,4 @@
-module.exports = {
+export const tailwindConfig = {
   darkmode: true,
   content: [
     "./src/**/*.{html,js,svelte,ts}",
