@@ -11,5 +11,6 @@ public static class InventoryEndpoints
         ItemEndpoints.AddItemEndpoints(inventory);
         VendorEndpoints.AddVendorEndpoints(inventory);
         PurchaseInvoiceEndpoints.AddPurchaseInvoiceEndpoints(inventory);
+        InventoryReviewEndpoints.AddInventoryReviewEndpoints(inventory);
     }
 }
