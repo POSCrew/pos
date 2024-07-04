@@ -8,8 +8,7 @@ public static class CustomerEndpoints
 {
     public static void AddCustomerEndpoints(this IEndpointRouteBuilder routes)
     {
-        var customers = routes.MapGroup("customers")
-            .AddEndpointFilter(RequiresInitializationFilter.Instance);
+        var customers = routes.MapGroup("customers");
         customers.MapPost("/", Create);
         customers.MapPut("/", Update);
         customers.MapDelete("/", Remove);

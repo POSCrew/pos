@@ -10,4 +10,5 @@ public interface IItemService
     Task<List<Item>> GetAll(int? page, int? pageSize);
     Task Remove(int id);
     Task<int> GetCount();
+    Task ValidateItemQuantity();
 }

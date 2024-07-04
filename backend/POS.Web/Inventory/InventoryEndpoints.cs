@@ -6,7 +6,7 @@ public static class InventoryEndpoints
     {
         var inventory = routes.MapGroup("inventory")
             .RequireAuthorization(PosIdentity.SellerOrAdminPolicy)
-            .AddEndpointFilter(RequiresInitializationFilter.Instance);
+            .AddEndpointFilter<RequiresInitializationFilter>();
 
         ItemEndpoints.AddItemEndpoints(inventory);
         VendorEndpoints.AddVendorEndpoints(inventory);

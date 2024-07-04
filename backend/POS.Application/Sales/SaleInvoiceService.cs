@@ -2,29 +2,30 @@ using Microsoft.EntityFrameworkCore;
 using POS.Application.Abstractions;
 using POS.Application.Abstractions.Data;
 using POS.Core.Inventory;
+using POS.Core.Sales;
 
-namespace POS.Application.Inventory;
+namespace POS.Application.Sales;
 
-public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
+public sealed class SaleInvoiceService : ISaleInvoiceService
 {
     private readonly ITransactionManager _transactionManager;
-    private readonly IRepository<PurchaseInvoice> _repository;
-    private readonly IRepository<PurchaseInvoiceItem> _itemRepository;
+    private readonly IRepository<SaleInvoice> _repository;
+    private readonly IRepository<SaleInvoiceItem> _itemRepository;
     private readonly IGeneralService _generalService;
-    private readonly IVendorService _vendorService;
+    private readonly ICustomerService _customerService;
     private readonly IItemService _itemService;
 
-    public PurchaseInvoiceService(IRepository<PurchaseInvoice> repository, ITransactionManager transactionManager, IRepository<PurchaseInvoiceItem> itemRepository, IGeneralService generalService, IVendorService vendorService, IItemService itemService)
+    public SaleInvoiceService(IRepository<SaleInvoice> repository, ITransactionManager transactionManager, IRepository<SaleInvoiceItem> itemRepository, IGeneralService generalService, ICustomerService customerService, IItemService itemService)
     {
         _repository = repository;
         _transactionManager = transactionManager;
         _itemRepository = itemRepository;
         _generalService = generalService;
-        _vendorService = vendorService;
+        _customerService = customerService;
         _itemService = itemService;
     }
 
-    public async Task<PurchaseInvoice> Create(CreatePurchaseInvoiceRequest createRequest, string userId)
+    public async Task<SaleInvoice> Create(CreateSaleInvoiceRequest createRequest, string userId)
     {
         using var t = await _transactionManager.BeginTransactionAsync();
         var invoice = await MapToInvoice(createRequest, userId);
@@ -32,11 +33,13 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         _repository.Add(invoice);
         await _repository.SaveChangesAsync();
 
+        await _itemService.ValidateItemQuantity();
+
         await t.CommitAsync();
         return invoice;
     }
 
-    public async Task<PurchaseInvoice> Update(UpdatePurchaseInvoiceRequest updateRequest)
+    public async Task<SaleInvoice> Update(UpdateSaleInvoiceRequest updateRequest)
     {
         using var t = await _transactionManager.BeginTransactionAsync();
         var invoice = await MapToInvoice(updateRequest);
@@ -50,12 +53,12 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         return invoice;
     }
 
-    private async Task<PurchaseInvoice> MapToInvoice(UpdatePurchaseInvoiceRequest invoice)
+    private async Task<SaleInvoice> MapToInvoice(UpdateSaleInvoiceRequest invoice)
     {
         ArgumentNullException.ThrowIfNull(invoice);
         ArgumentNullException.ThrowIfNull(invoice.InvoiceItems);
 
-        var previousInvoice = _repository.Set.Include(i => i.Vendor).Include(i => i.InvoiceItems).ThenInclude(ii => ii.Item).FirstOrDefault(i => i.ID == invoice.ID);
+        var previousInvoice = _repository.Set.Include(i => i.Customer).Include(i => i.InvoiceItems).ThenInclude(ii => ii.Item).FirstOrDefault(i => i.ID == invoice.ID);
         if (previousInvoice is null)
             throw new POSException("invalid id");
 
@@ -65,8 +68,8 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         await CheckDateAndNumber(previousInvoice.Date, previousInvoice.Number, previousInvoice.ID);
         CheckRowNumbers(invoice.InvoiceItems);
 
-        if (previousInvoice.Vendor.ID != (invoice.VendorId ?? -1))
-            previousInvoice.Vendor = await GetVendor(invoice.VendorId);
+        if (previousInvoice.Customer.ID != (invoice.CustomerId ?? -1))
+            previousInvoice.Customer = await GetCustomer(invoice.CustomerId);
 
         for (int i = previousInvoice.InvoiceItems.Count - 1; i >= 0; i--)
         {
@@ -91,7 +94,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
 
             if (previousItem is null)
             {
-                previousInvoice.InvoiceItems.Add(new PurchaseInvoiceItem
+                previousInvoice.InvoiceItems.Add(new SaleInvoiceItem
                 {
                     RowNumber = item.RowNumber,
                     Quantity = item.Quantity,
@@ -113,7 +116,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         return previousInvoice;
     }
 
-    private async Task<PurchaseInvoice> MapToInvoice(CreatePurchaseInvoiceRequest invoice, string userId)
+    private async Task<SaleInvoice> MapToInvoice(CreateSaleInvoiceRequest invoice, string userId)
     {
         ArgumentNullException.ThrowIfNull(invoice);
         ArgumentNullException.ThrowIfNull(invoice.InvoiceItems);
@@ -121,13 +124,13 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         await CheckDateAndNumber(invoice.Date, invoice.Number);
         CheckRowNumbers(invoice.InvoiceItems);
 
-        var result = new PurchaseInvoice
+        var result = new SaleInvoice
         {
             Date = invoice.Date,
             Number = invoice.Number ?? await GetMaxNumber() + 1,
-            Vendor = await GetVendor(invoice.VendorId),
+            Customer = await GetCustomer(invoice.CustomerId),
             CreatorID = userId,
-            InvoiceItems = new List<PurchaseInvoiceItem>(invoice.InvoiceItems.Count)
+            InvoiceItems = new List<SaleInvoiceItem>(invoice.InvoiceItems.Count)
         };
 
         var total = 0m;
@@ -139,7 +142,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
             if (item.Quantity <= 0)
                 throw new POSException("invoice item quantity should be positive");
 
-            result.InvoiceItems.Add(new PurchaseInvoiceItem
+            result.InvoiceItems.Add(new SaleInvoiceItem
             {
                 RowNumber = item.RowNumber,
                 Quantity = item.Quantity,
@@ -163,7 +166,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
             throw new POSException("invoice number already exists");
     }
 
-    private void CheckRowNumbers(List<CreatePurchaseInvoiceItemRequest> invoiceItems)
+    private void CheckRowNumbers(List<CreateSaleInvoiceItemRequest> invoiceItems)
     {
         Span<bool> rowNumbers = stackalloc bool[invoiceItems.Count];
         for (int i = 0; i < invoiceItems.Count; i++)
@@ -179,7 +182,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         }
     }
 
-    private void CheckRowNumbers(List<UpdatePurchaseInvoiceItemRequest> invoiceItems)
+    private void CheckRowNumbers(List<UpdateSaleInvoiceItemRequest> invoiceItems)
     {
         Span<bool> rowNumbers = stackalloc bool[invoiceItems.Count];
         for (int i = 0; i < invoiceItems.Count; i++)
@@ -204,11 +207,11 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         return item;
     }
 
-    private async Task<Vendor> GetVendor(int? vendorId)
+    private async Task<Customer> GetCustomer(int? customerId)
     {
-        var v = await _vendorService.GetByID(vendorId ?? -1, true);
+        var v = await _customerService.GetByID(customerId ?? -1, true);
         if (v is null)
-            throw new POSException("vendor not found");
+            throw new POSException("customer not found");
 
         return v;
     }
@@ -218,17 +221,17 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         return await _repository.Set.MaxAsync(i => (int?)i.Number) ?? 1;
     }
 
-    public Task<PurchaseInvoice?> GetByID(int id)
+    public Task<SaleInvoice?> GetByID(int id)
     {
-        return _repository.Set.Where(i => i.ID == id).Include(i => i.Vendor).Include(i => i.InvoiceItems).ThenInclude(ii => ii.Item).AsNoTracking().FirstOrDefaultAsync();
+        return _repository.Set.Where(i => i.ID == id).Include(i => i.Customer).Include(i => i.InvoiceItems).ThenInclude(ii => ii.Item).AsNoTracking().FirstOrDefaultAsync();
     }
 
-    public Task<List<PurchaseInvoice>> GetAll(int? page, int? pageSize)
+    public Task<List<SaleInvoice>> GetAll(int? page, int? pageSize)
     {
         if (page is null || pageSize is null || page < 0 || pageSize < 1)
             return _repository.Set.AsNoTracking().ToListAsync();
 
-        return _repository.Set.Skip(page.Value * pageSize.Value).Take(pageSize.Value).Include(i => i.Vendor).AsNoTracking().ToListAsync();
+        return _repository.Set.Skip(page.Value * pageSize.Value).Take(pageSize.Value).Include(i => i.Customer).AsNoTracking().ToListAsync();
     }
 
     public Task<int> GetCount()
@@ -239,7 +242,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
     public async Task Remove(int id)
     {
         using var t = await _transactionManager.BeginTransactionAsync();
-        
+
         var invoice = await GetByID(id);
         if(invoice is null)
             throw new POSException("invalid id");
@@ -251,8 +254,6 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
 
         _repository.Remove(id);
         await _repository.SaveChangesAsync();
-
-        await _itemService.ValidateItemQuantity();
         
         await t.CommitAsync();
     }

@@ -32,7 +32,7 @@ public static class PurchaseInvoiceEndpoints
         [FromBody] CreatePurchaseInvoiceRequest purcahseInvoice
     )
     {
-        _ = int.TryParse(httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "-1", out int userId);
+        var userId = httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         return await purcahseInvoiceService.Create(purcahseInvoice, userId);
     }
 

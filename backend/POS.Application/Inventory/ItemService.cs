@@ -93,4 +93,40 @@ public sealed class ItemService : IItemService
         _repository.Remove(id);
         return _repository.SaveChangesAsync();
     }
+
+    public sealed record ItemWithNegativeQuantity(string Serial, string Title, DateTime Day, decimal DailyQuantity);
+    public async Task ValidateItemQuantity()
+    {
+        var itemsWithNegativeQuantity = await _repository.ExecuteRawSql<ItemWithNegativeQuantity>($"""
+WITH DailyQuantities AS (
+    SELECT Q.ItemId, Q.[Day], SUM(Q.Quantity) OVER (PARTITION BY Q.ItemID ORDER BY Q.[Day]) AS DailyQuantity
+        FROM
+        (
+            SELECT CAST(S.[Date] AS Date) AS [Day], SI.ItemID, -SI.Quantity AS Quantity
+            FROM SaleInvoiceItem SI
+            INNER JOIN SaleInvoices S ON SI.SaleInvoiceID = S.ID
+
+            UNION ALL
+
+            SELECT CAST(P.[Date] AS Date) AS [Day], PI.ItemID, PI.Quantity
+            FROM PurchaseInvoiceItem PI
+            INNER JOIN PurchaseInvoices P ON PI.PurchaseInvoiceID = P.ID
+        ) AS Q
+)
+SELECT IT.Serial, IT.Title, NI.[Day] AS [Day], NI.DailyQuantity
+FROM Items IT
+CROSS APPLY
+(
+    SELECT TOP 1 DQ.ItemID, DQ.[Day], DQ.DailyQuantity
+    FROM DailyQuantities DQ
+    WHERE DQ.DailyQuantity < 0
+        AND DQ.ItemID = IT.ID
+) NI
+""");
+
+        if(itemsWithNegativeQuantity.Count == 0)
+            return;
+        
+        throw new POSException("item has negative quantity", metaData: itemsWithNegativeQuantity);
+    }
 }

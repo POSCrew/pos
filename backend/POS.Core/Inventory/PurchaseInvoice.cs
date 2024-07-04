@@ -8,8 +8,8 @@ public sealed class PurchaseInvoice : BaseEntity
     public int Number { get; set; }
     [DataType("DECIMAL(19, 4)")] public decimal TotalPrice { get; set; }
     public Vendor Vendor { get; set; } = null!;
-    public int CreatorID { get; set; }
-    public List<PurchaseInvoiceItem> InvoiceItems { get; set; } = new List<PurchaseInvoiceItem>();
+    [MaxLength(450)] public string CreatorID { get; set; } = null!;
+    public List<PurchaseInvoiceItem> InvoiceItems { get; set; } = [];
     // TODO: add concurrency stamp
 }
 
@@ -27,7 +27,7 @@ public sealed class CreatePurchaseInvoiceRequest
     public DateTime Date { get; set; }
     public int? Number { get; set; }
     public int? VendorId { get; set; }
-    public List<CreatePurchaseInvoiceItemRequest> InvoiceItems { get; set; } = new List<CreatePurchaseInvoiceItemRequest>();
+    public List<CreatePurchaseInvoiceItemRequest> InvoiceItems { get; set; } = [];
 }
 
 public sealed class CreatePurchaseInvoiceItemRequest
@@ -44,7 +44,7 @@ public sealed class UpdatePurchaseInvoiceRequest
     public DateTime Date { get; set; }
     public int? Number { get; set; }
     public int? VendorId { get; set; }
-    public List<UpdatePurchaseInvoiceItemRequest> InvoiceItems { get; set; } = new List<UpdatePurchaseInvoiceItemRequest>();
+    public List<UpdatePurchaseInvoiceItemRequest> InvoiceItems { get; set; } = [];
 }
 
 public sealed class UpdatePurchaseInvoiceItemRequest

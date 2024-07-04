@@ -46,4 +46,18 @@ public sealed class Repository<T> : IRepository<T>
     {
         _context.Entry(vendor).State = EntityState.Unchanged;
     }
+
+    public async Task<Tdto> ExecuteRawSqlScalar<Tdto>(FormattableString sql, Tdto defaultValue = default!)
+    {
+        var res = await ExecuteRawSql<Tdto>(sql);
+        if (res is null || res.Count == 0)
+            return defaultValue;
+
+        return res[0];
+    }
+
+    public async Task<List<Tdto>> ExecuteRawSql<Tdto>(FormattableString sql)
+    {
+        return await _context.Database.SqlQuery<Tdto>(sql).ToListAsync();
+    }
 }

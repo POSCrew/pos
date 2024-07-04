@@ -13,7 +13,7 @@ public static class GeneralEndpoints
         general.MapGet("isStoreInitialized", IsStoreInitialized);
         general.MapPost("initialize", Initialize);
         general.MapGet("store", StoreInfo)
-            .AddEndpointFilter(RequiresInitializationFilter.Instance);
+            .AddEndpointFilter<RequiresInitializationFilter>();
     }
 
     private static Task<Store> StoreInfo(
@@ -23,9 +23,11 @@ public static class GeneralEndpoints
         return generalService.GetStoreInfo();
     }
 
-    private static bool IsStoreInitialized()
+    private static bool IsStoreInitialized(
+        [FromServices] IGeneralService generalService
+    )
     {
-        return IGeneralService.IsStoreInitialized;
+        return generalService.IsStoreInitialized;
     }
 
     private static async Task<Store> Initialize(

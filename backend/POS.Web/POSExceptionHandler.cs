@@ -21,13 +21,21 @@ public sealed class POSExceptionHandler : IExceptionHandler
             _logger.LogWarning(pexp, "POSException");
             httpContext.Response.ContentType = "application/problem+json";
             httpContext.Response.StatusCode = (int)pexp.StatusCode;
-            await httpContext.Response.WriteAsync(JsonSerializer.Serialize(
-                new ProblemDetails
+            var problem = new ProblemDetails
+            {
+                Title = pexp.Message,
+                Status = (int)pexp.StatusCode,
+            };
+
+            if (pexp.MetaData != null)
+            {
+                problem.Extensions = new Dictionary<string, object?>()
                 {
-                    Title = pexp.Message,
-                    Status = (int)pexp.StatusCode
-                }
-            ), cancellationToken);
+                    {"metaData", pexp.MetaData}
+                };
+            }
+
+            await httpContext.Response.WriteAsync(JsonSerializer.Serialize(problem), cancellationToken);
             return true;
         }
 

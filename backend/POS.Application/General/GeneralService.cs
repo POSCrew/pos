@@ -7,10 +7,38 @@ namespace POS.Application.General;
 
 public sealed class GeneralService : IGeneralService
 {
+    private static bool? isStoreInitialized = null;
+    private static object lockObject = new object();
     private static Store? StoreInfo = null;
 
     private readonly ITransactionManager _transactionManager;
     private readonly IRepository<Store> _repository;
+
+    public bool IsStoreInitialized
+    {
+        get
+        {
+            if(isStoreInitialized is null)
+            {
+                lock(lockObject)
+                {
+                    if(isStoreInitialized is null)
+                        isStoreInitialized = _repository.Set.Any();
+                }
+            }
+            return isStoreInitialized.Value;
+        }
+        private set
+        {
+            if(!value)
+                throw new ArgumentException($"value cannot be false in {nameof(isStoreInitialized)}.set");
+            
+            lock(lockObject)
+            {
+                isStoreInitialized = value;
+            }
+        }
+    }
 
     public GeneralService(IRepository<Store> repository, ITransactionManager transactionManager)
     {
@@ -25,7 +53,7 @@ public sealed class GeneralService : IGeneralService
 
     public async Task<Store> InitializeStore(Store store)
     {
-        if(IGeneralService.IsStoreInitialized)
+        if(IsStoreInitialized)
             throw new POSException("store is already initialized");
 
         store.ID = 0;
@@ -50,7 +78,7 @@ public sealed class GeneralService : IGeneralService
         await _repository.SaveChangesAsync();
         
         await t.CommitAsync();
-        IGeneralService.IsStoreInitialized = true;
+        IsStoreInitialized = true;
 
         return store;
     }
