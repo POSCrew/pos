@@ -7,6 +7,7 @@ import { tVendorService, VendorService } from "./services/vendorService";
 import { CustomerService, tCustomerService } from "./services/CustomerService";
 import { InventoryReviewService, tInventoryReviewService } from "./services/InventoryReviewService";
 import { SalesReviewService, tSalesReviewService } from "./services/SalesReviewService";
+import { PricingService, tPricingService } from "./services/PricingService";
 
 export const sl = new Container({
   defaultLifeTime: LifeTime.Persistent,
@@ -32,6 +33,10 @@ sl.register([
   {
     token: tItemService,
     useClass: ItemService,
+  },
+  {
+    token: tPricingService,
+    useClass: PricingService,
   },
   {
     token: tInventoryReviewService,
