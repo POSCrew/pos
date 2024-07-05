@@ -10,5 +10,6 @@ public static class SalesEndpoints
 
         CustomerEndpoints.AddCustomerEndpoints(sales);
         SaleInvoiceEndpoints.AddSaleInvoiceEndpoints(sales);
+        PricingEndpoints.AddPricingEndpoints(sales);
     }
 }

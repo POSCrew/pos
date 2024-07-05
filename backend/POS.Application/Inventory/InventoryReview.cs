@@ -21,6 +21,10 @@ SELECT
     Invoices.ItemID,
     IT.Serial AS ItemSerial,
     IT.Title AS ItemTitle,
+    CASE
+        WHEN Invoices.[Type] = 0 THEN 'Purchase Invoice'
+        ELSE 'Sale Invoice'
+    END AS InvoiceType,
     Invoices.[Date] AS InvoiceDate,
     Invoices.Number AS InvoiceNumber,
     Invoices.InvoiceQuantity,
@@ -35,7 +39,7 @@ FROM
 
     UNION ALL
 
-    SELECT CAST(S.[Date] AS Date) AS [Day], S.[Date], S.Number, SI.ItemID, -SI.Quantity AS InvoiceQuantity, SI.Price, SI.Fee, 1 AS [Type]
+    SELECT CAST(S.[Date] AS Date) AS [Day], S.[Date], S.Number, SI.ItemID, -SI.Quantity AS InvoiceQuantity, -SI.Price, -SI.Fee, 1 AS [Type]
     FROM SaleInvoiceItem SI
     INNER JOIN SaleInvoices S ON SI.SaleInvoiceID = S.ID
 ) Invoices
@@ -51,6 +55,7 @@ public sealed class InventoryReviewItems
     public int ItemID { get; set; }
     public string? ItemSerial { get; set; }
     public string? ItemTitle { get; set; }
+    public string? InvoiceType { get; set; }
     public DateTime InvoiceDate { get; set; }
     public int InvoiceNumber { get; set; }
     public decimal InvoiceQuantity { get; set; }

@@ -13,8 +13,9 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
     private readonly IGeneralService _generalService;
     private readonly IVendorService _vendorService;
     private readonly IItemService _itemService;
+    private readonly IPricingService _pricingService;
 
-    public PurchaseInvoiceService(IRepository<PurchaseInvoice> repository, ITransactionManager transactionManager, IRepository<PurchaseInvoiceItem> itemRepository, IGeneralService generalService, IVendorService vendorService, IItemService itemService)
+    public PurchaseInvoiceService(IRepository<PurchaseInvoice> repository, ITransactionManager transactionManager, IRepository<PurchaseInvoiceItem> itemRepository, IGeneralService generalService, IVendorService vendorService, IItemService itemService, IPricingService pricingService)
     {
         _repository = repository;
         _transactionManager = transactionManager;
@@ -22,6 +23,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         _generalService = generalService;
         _vendorService = vendorService;
         _itemService = itemService;
+        _pricingService = pricingService;
     }
 
     public async Task<PurchaseInvoice> Create(CreatePurchaseInvoiceRequest createRequest, string userId)
@@ -34,6 +36,50 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
 
         await t.CommitAsync();
         return invoice;
+    }
+
+    private async Task<PurchaseInvoice> MapToInvoice(CreatePurchaseInvoiceRequest invoice, string userId)
+    {
+        ArgumentNullException.ThrowIfNull(invoice);
+        ArgumentNullException.ThrowIfNull(invoice.InvoiceItems);
+
+        await CheckDateAndNumber(invoice.Date, invoice.Number);
+        CheckRowNumbers(invoice.InvoiceItems);
+
+        var result = new PurchaseInvoice
+        {
+            Date = new DateTime(invoice.Date.Year, invoice.Date.Month, invoice.Date.Day, invoice.Date.Hour, invoice.Date.Minute, invoice.Date.Second),
+            Number = invoice.Number ?? await GetMaxNumber() + 1,
+            Vendor = await GetVendor(invoice.VendorId),
+            CreatorID = userId,
+            InvoiceItems = new List<PurchaseInvoiceItem>(invoice.InvoiceItems.Count)
+        };
+
+        if(await _pricingService.IsThereAnyPricingInDate(result.Date))
+            throw new POSException("there is a pricing in this date");
+
+        var total = 0m;
+        foreach (var item in invoice.InvoiceItems)
+        {
+            if (item.Price <= 0)
+                throw new POSException("invoice item price should be positive");
+
+            if (item.Quantity <= 0)
+                throw new POSException("invoice item quantity should be positive");
+
+            result.InvoiceItems.Add(new PurchaseInvoiceItem
+            {
+                RowNumber = item.RowNumber,
+                Quantity = item.Quantity,
+                Fee = Math.Round(item.Price / item.Quantity, 4),
+                Price = item.Price,
+                Item = await GetItem(item.ItemId)
+            });
+
+            total += item.Price;
+        }
+        result.TotalPrice = total;
+        return result;
     }
 
     public async Task<PurchaseInvoice> Update(UpdatePurchaseInvoiceRequest updateRequest)
@@ -60,7 +106,10 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
             throw new POSException("invalid id");
 
         previousInvoice.Number = invoice.Number ?? await GetMaxNumber() + 1;
-        previousInvoice.Date = invoice.Date;
+        previousInvoice.Date = new DateTime(invoice.Date.Year, invoice.Date.Month, invoice.Date.Day, invoice.Date.Hour, invoice.Date.Minute, invoice.Date.Second);
+
+        if(await _pricingService.IsThereAnyPricingInDate(previousInvoice.Date))
+            throw new POSException("there is a pricing in this date");
 
         await CheckDateAndNumber(previousInvoice.Date, previousInvoice.Number, previousInvoice.ID);
         CheckRowNumbers(invoice.InvoiceItems);
@@ -111,47 +160,6 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         }
         previousInvoice.TotalPrice = total;
         return previousInvoice;
-    }
-
-    private async Task<PurchaseInvoice> MapToInvoice(CreatePurchaseInvoiceRequest invoice, string userId)
-    {
-        ArgumentNullException.ThrowIfNull(invoice);
-        ArgumentNullException.ThrowIfNull(invoice.InvoiceItems);
-
-        await CheckDateAndNumber(invoice.Date, invoice.Number);
-        CheckRowNumbers(invoice.InvoiceItems);
-
-        var result = new PurchaseInvoice
-        {
-            Date = invoice.Date,
-            Number = invoice.Number ?? await GetMaxNumber() + 1,
-            Vendor = await GetVendor(invoice.VendorId),
-            CreatorID = userId,
-            InvoiceItems = new List<PurchaseInvoiceItem>(invoice.InvoiceItems.Count)
-        };
-
-        var total = 0m;
-        foreach (var item in invoice.InvoiceItems)
-        {
-            if (item.Price <= 0)
-                throw new POSException("invoice item price should be positive");
-
-            if (item.Quantity <= 0)
-                throw new POSException("invoice item quantity should be positive");
-
-            result.InvoiceItems.Add(new PurchaseInvoiceItem
-            {
-                RowNumber = item.RowNumber,
-                Quantity = item.Quantity,
-                Fee = Math.Round(item.Price / item.Quantity, 4),
-                Price = item.Price,
-                Item = await GetItem(item.ItemId)
-            });
-
-            total += item.Price;
-        }
-        result.TotalPrice = total;
-        return result;
     }
 
     private async Task CheckDateAndNumber(DateTime date, int? number, int excludedInvoiceId = -1)
@@ -243,6 +251,9 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         var invoice = await GetByID(id);
         if(invoice is null)
             throw new POSException("invalid id");
+
+        if(await _pricingService.IsThereAnyPricingInDate(invoice.Date))
+            throw new POSException("there is a pricing in this date");
 
         foreach(var item in invoice.InvoiceItems)
         {
