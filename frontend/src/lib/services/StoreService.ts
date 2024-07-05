@@ -2,7 +2,7 @@ import type { User } from "../data/User";
 import { HttpModule, tHttpModule } from "./http";
 import { Inject, Injectable } from "container-ioc";
 
-export const tStoreService = Symbol("authService");
+export const tStoreService = Symbol("storeService");
 @Injectable()
 export class StoreService {
   constructor(@Inject(tHttpModule) private http: HttpModule) {}
