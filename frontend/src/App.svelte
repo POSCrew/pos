@@ -4,11 +4,15 @@
   import LogIn from "./lib/pages/login/LogIn.svelte";
 </script>
 
+
 <Router>
-  <Route path="/">
+  <Route path="/*">
     <HomePage />
   </Route>
   <Route path="/login">
     <LogIn />
+  </Route>
+  <Route path="/basic-data">
+
   </Route>
 </Router>

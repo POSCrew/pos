@@ -5,15 +5,19 @@
   import NavigationMenu from "./NavigationMenu.svelte";
   import MainArea from "./MainArea.svelte";
   import { onMount } from "svelte";
-  import { navigate } from "svelte-navigator";
+  import { navigate, Route, Router } from "svelte-navigator";
   import { AuthService, tAuthService } from "../../services/AuthService";
   import type { User } from "../../data/User";
   import { sl } from "../../di";
+  import { createTabs, melt } from '@melt-ui/svelte';
+  import SaleInvoice from "./sale-inv/SaleInvoice.svelte";
+  import Vendor from "./vendor/Vendor.svelte";
+  
   let authService: AuthService;
   let user: User = null;
 
-  let items = $state([]);
-  let invoice = $state({});
+  let items = ([]);
+  let invoice = ({});
   onMount(async () => {
     authService = sl.resolve(tAuthService);
     user = await authService.currentUser();
@@ -26,30 +30,70 @@
       navigate("/login");
     }
   }
+
+let tabGroup = $state({ind:0})
+function tabIndexChange(ind){
+  tabGroup.ind = ind;
+}
 </script>
 
-<div class="navbar bg-slate-200 h-10 flex items-center px-4 md:px-12 lg:px-24 py-6">
+<div class="h-full flex flex-col">
+
+
+<div class="flex-grow-0">
+  <div class="flex justify-start">
+
   
-  {@render navBtn("Sale invoice", faPlus)}
-  <Space width="4px"/>
-  {@render navBtn("Purchase invoice", faPlus)}
-
-
+  <div class="tab" on:click={()=>tabIndexChange(0)} data-state="{tabGroup.ind===0?'active':''}">
+    Sale
+   </div>
+  
+  <div class="tab" on:click={()=>tabIndexChange(1)} data-state={tabGroup.ind===1?'active':''}>
+    Inventory
+  </div>
+</div>
+  <div class="navbar bg-slate-200 h-10 flex items-center px-4 md:px-12 lg:px-24 py-6">
+   {#if tabGroup.ind===0}
+   
+  
+    {@render navBtn("Sale invoice", faPlus, ()=>{navigate('sale-inv')})}
+    <Space width="4px"/>
+    
+    {@render navBtn("Customer", faPlus)}
+    <Space width="4px"/>
+    {@render navBtn("Pricing", faPlus)}
+    <Space width="4px"/>
+    {@render navBtn("Sales Review", faPlus)}
+    <Space width="4px"/>
+  
+   
+   {:else if tabGroup.ind===1}
+   {@render navBtn("Purchase invoice", faPlus)}
+   <Space width="4px"/>
+   {@render navBtn("Vendor", faPlus, ()=>{navigate('vendor')})}
+    <Space width="4px"/>
+    {@render navBtn("Item", faPlus)}
+    <Space width="4px"/>
+    {@render navBtn("Inventory Review", faPlus)}
+    <Space width="4px"/>
+   {/if}
+  </div>
 </div>
 
-<main class="flex min-h-full">
-  
-  <div class="flex-grow-0 w-96">
-    <NavigationMenu {items}/>
-  </div>
-  <div class="grow w-0">
-    <MainArea {items}/>
-  </div>
-</main>
+<div class="grow">
 
 
-{#snippet navBtn(text, icon)}
-<Button hoverColor="#fff3" borderColor='#555' borderThickness=1>
+  <Route path="sale-inv">
+    <SaleInvoice/>
+  </Route>
+  <Route path="vendor">
+    <Vendor/>
+  </Route>
+</div>
+</div>
+
+{#snippet navBtn(text, icon, onclick=()=>{})}
+<Button hoverColor="#fff3" borderColor='#555' borderThickness=1 on:click={onclick}>
   <Fa icon={icon} /> {text}
 </Button>
 {/snippet}
@@ -58,5 +102,38 @@
 <style lang="postcss">
   .navbar{
     @apply border-b-[1px] border-b-slate-600;
+  }
+
+  .tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: default;
+    user-select: none;
+    border-radius: 0;
+    background-color: theme(colors.neutral.100);
+
+    color: theme(colors.neutral.900);
+    font-weight: 500;
+    line-height: 1;
+
+    height: theme(spacing.12);
+    padding-inline: theme(spacing.2);
+
+    &:focus {
+      position: relative;
+    }
+
+    &:focus-visible {
+      @apply z-10 ring-2;
+    }
+
+    &[data-state='active'] {
+      @apply focus:relative text-slate-800;
+      background-color: rgb(183, 243, 255);
+      text-decoration: underline;
+    }
+
   }
 </style>

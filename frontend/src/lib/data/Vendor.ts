@@ -1,5 +1,5 @@
 export class Vendor{
-    id: number;
+    id?: number;
     code: string;
     firstName: string;
     lastName: string;
