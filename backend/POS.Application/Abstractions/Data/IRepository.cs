@@ -9,6 +9,5 @@ public interface IRepository<T>
     void Remove(int id);
     Task SaveChangesAsync();
     void ChangeStateToUnchanged(T vendor);
-    Task<Tdto> ExecuteRawSqlScalar<Tdto>(FormattableString sql, Tdto defaultValue = default!);
     Task<List<Tdto>> ExecuteRawSql<Tdto>(FormattableString sql);
 }

@@ -11,7 +11,7 @@ public sealed class Pricing : BaseEntity
 
 public sealed class InvoiceAveragePurchasePrice : BaseEntity
 {
-    public int? SaleInvoiceItem { get; set; }
-    public int? PurchaseInvoiceItem { get; set; }
+    public int? SaleInvoiceItemID { get; set; }
+    public int? PurchaseInvoiceItemID { get; set; }
     [DataType("DECIMAL(19, 4)")] public decimal AveragePurchasePrice { get; set; }
 }
