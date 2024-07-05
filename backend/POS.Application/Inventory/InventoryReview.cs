@@ -25,6 +25,7 @@ SELECT
         WHEN Invoices.[Type] = 0 THEN 'Purchase Invoice'
         ELSE 'Sale Invoice'
     END AS InvoiceType,
+    Invoices.[Day] AS InvoiceDay,
     Invoices.[Date] AS InvoiceDate,
     Invoices.Number AS InvoiceNumber,
     Invoices.InvoiceQuantity,
@@ -56,6 +57,7 @@ public sealed class InventoryReviewItems
     public string? ItemSerial { get; set; }
     public string? ItemTitle { get; set; }
     public string? InvoiceType { get; set; }
+    public DateTime InvoiceDay { get; set; }
     public DateTime InvoiceDate { get; set; }
     public int InvoiceNumber { get; set; }
     public decimal InvoiceQuantity { get; set; }
