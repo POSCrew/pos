@@ -39,7 +39,7 @@ WITH InvoiceItems AS (
         PI.Fee AS InvoiceItemFee,
         PI.Price AS InvoiceItemPrice,
         AV.AveragePurchasePrice AS AveragePurchaseFee,
-        -PI.Price AS Profit
+        0 AS Profit -- -PI.Price AS Profit
     FROM PurchaseInvoiceItem PI
     INNER JOIN PurchaseInvoices P ON PI.PurchaseInvoiceID = P.ID
     INNER JOIN Items IT ON PI.ItemID = IT.ID

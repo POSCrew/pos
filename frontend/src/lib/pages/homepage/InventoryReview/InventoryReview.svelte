@@ -54,11 +54,11 @@
           <th scope="col" class="px-6 py-3"> Item Title</th>
           <th scope="col" class="px-6 py-3"> Invoice Type</th>
           <!-- <th scope="col" class="px-6 py-3"> InvoiceDay</th> -->
-          <th scope="col" class="px-6 py-3"> Invoice Date</th>
           <th scope="col" class="px-6 py-3"> Invoice Number</th>
+          <th scope="col" class="px-6 py-3"> Invoice Date</th>
           <th scope="col" class="px-6 py-3"> Invoice Quantity</th>
-          <th scope="col" class="px-6 py-3"> Invoice Price</th>
           <th scope="col" class="px-6 py-3"> Invoice Fee</th>
+          <th scope="col" class="px-6 py-3"> Invoice Price</th>
           <th scope="col" class="px-6 py-3"> Running Quantity</th>
         </tr>
       </thead>
@@ -71,11 +71,11 @@
             <td class="px-6 py-4"> {ven.itemTitle} </td>
             <td class="px-6 py-4"> {ven.invoiceType} </td>
             <!-- <td class="px-6 py-4"> {ven.InvoiceDay} </td> -->
-            <td class="px-6 py-4"> {new Date(ven.invoiceDate).toLocaleString()} </td>
             <td class="px-6 py-4"> {ven.invoiceNumber} </td>
+            <td class="px-6 py-4"> {new Date(ven.invoiceDate).toLocaleString()} </td>
             <td class="px-6 py-4"> {ven.invoiceQuantity} </td>
-            <td class="px-6 py-4"> {ven.invoicePrice} </td>
             <td class="px-6 py-4"> {ven.invoiceFee} </td>
+            <td class="px-6 py-4"> {ven.invoicePrice} </td>
             <td class="px-6 py-4"> {ven.runningQuantity} </td>
           </tr>{/each}
       </tbody>

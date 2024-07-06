@@ -15,6 +15,7 @@
   import Customer from "./customer/Customer.svelte";
   import Item from "./item/Item.svelte";
   import InventoryReview from "./InventoryReview/InventoryReview.svelte";
+  import SalesReview from "./salesReview/SalesReview.svelte";
   
   let authService: AuthService;
   let user: User = null;
@@ -66,7 +67,7 @@ function tabIndexChange(ind){
     <Space width="4px"/>
     {@render navBtn("Pricing", faPlus)}
     <Space width="4px"/>
-    {@render navBtn("Sales Review", faPlus)}
+    {@render navBtn("Sales Review", faPlus, ()=>{navigate('sale-review')})}
     <Space width="4px"/>
   
    
@@ -100,6 +101,9 @@ function tabIndexChange(ind){
   </Route>
   <Route path="inv-review">
     <InventoryReview/>
+  </Route>
+  <Route path="sale-review">
+    <SalesReview/>
   </Route>
 </div>
 </div>
