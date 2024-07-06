@@ -11,13 +11,14 @@
   import type { Item } from "../../../data/Item";
   import { untrack } from "svelte";
   import { flip } from "svelte/animate";
-  import { Button, DatePicker, DialogUtils, NumberField } from "ui-commons";
+  import { Button, DatePicker, DialogUtils, NumberField, TextField } from "ui-commons";
   import { isoDate } from "../../../utils/dateUtils";
   import { sl } from "../../../di";
   import {
     SaleInvoiceService,
     tSaleInvoiceService,
   } from "../../../services/SaleInvoiceService";
+  import { navigate } from "svelte-navigator";
 
   const invoiceService: SaleInvoiceService = sl.resolve(tSaleInvoiceService);
 
@@ -74,6 +75,7 @@
   }
   let invoiceDate = $state(isoDate(new Date().toISOString()));
   let invoiceNumber: number = $state();
+  let description = $state('')
 
   function save() {
     if (!customer) {
@@ -83,6 +85,7 @@
       .create({
         number: invoiceNumber,
         date: new Date(invoiceDate),
+        description,
         customerId: customer.id,
         invoiceItems,
       })
@@ -108,6 +111,7 @@
         <DatePicker bind:value={invoiceDate} label="Invoive Date : " />
         <NumberField bind:value={invoiceNumber} label="Invoice number : " />
       </div>
+      <TextField label="Description" bind:value={description}/>
     </div>
 
     <div class="h-0 grow overflow-y-auto">
@@ -167,7 +171,7 @@
   </div>
 
   <div class="flex-grow-0 border-t-2 p-2 px-6 flex items-center">
-    <Button color="#eee">
+    <Button color="#eee" on:click={()=>{navigate('../sale-inv-list')}}>
       <Fa icon={faList} />
       List
     </Button>

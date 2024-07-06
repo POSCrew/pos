@@ -17,6 +17,7 @@
   import InventoryReview from "./InventoryReview/InventoryReview.svelte";
   import SalesReview from "./salesReview/SalesReview.svelte";
   import Pricing from "./pricing/Pricing.svelte";
+  import SaleInvoiceList from "./sale-invoice-list/SaleInvoiceList.svelte";
   
   let authService: AuthService;
   let user: User = null;
@@ -90,6 +91,9 @@ function tabIndexChange(ind){
 
   <Route path="sale-inv">
     <SaleInvoice/>
+  </Route>
+  <Route path="sale-inv-list">
+    <SaleInvoiceList/>
   </Route>
   <Route path="customer">
     <Customer/>
