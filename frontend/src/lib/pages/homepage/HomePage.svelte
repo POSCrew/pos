@@ -12,6 +12,8 @@
   import { createTabs, melt } from '@melt-ui/svelte';
   import SaleInvoice from "./sale-inv/SaleInvoice.svelte";
   import Vendor from "./vendor/Vendor.svelte";
+  import Customer from "./customer/Customer.svelte";
+  import Item from "./item/Item.svelte";
   
   let authService: AuthService;
   let user: User = null;
@@ -59,7 +61,7 @@ function tabIndexChange(ind){
     {@render navBtn("Sale invoice", faPlus, ()=>{navigate('sale-inv')})}
     <Space width="4px"/>
     
-    {@render navBtn("Customer", faPlus)}
+    {@render navBtn("Customer", faPlus, ()=> {navigate('customer')})}
     <Space width="4px"/>
     {@render navBtn("Pricing", faPlus)}
     <Space width="4px"/>
@@ -72,7 +74,7 @@ function tabIndexChange(ind){
    <Space width="4px"/>
    {@render navBtn("Vendor", faPlus, ()=>{navigate('vendor')})}
     <Space width="4px"/>
-    {@render navBtn("Item", faPlus)}
+    {@render navBtn("Item", faPlus, ()=>{navigate('item')})}
     <Space width="4px"/>
     {@render navBtn("Inventory Review", faPlus)}
     <Space width="4px"/>
@@ -85,6 +87,12 @@ function tabIndexChange(ind){
 
   <Route path="sale-inv">
     <SaleInvoice/>
+  </Route>
+  <Route path="customer">
+    <Customer/>
+  </Route>
+  <Route path="item">
+    <Item/>
   </Route>
   <Route path="vendor">
     <Vendor/>

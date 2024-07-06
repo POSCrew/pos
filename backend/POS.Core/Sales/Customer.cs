@@ -8,6 +8,6 @@ public sealed class Customer : Party
     {
         ID = -1,
         Code = "0",
-        FirstName = "مشتری پیش فرض"
+        FirstName = "Default Customer"
     };
 }

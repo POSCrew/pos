@@ -61,7 +61,7 @@ public sealed class CustomerService : ICustomerService
         customer.PhoneNumber = customer.PhoneNumber?.Trim() ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(customer.Code))
-            throw new POSException("customer.vode is required");
+            throw new POSException("customer.code is required");
 
         if (string.IsNullOrWhiteSpace(customer.FirstName))
             throw new POSException("customer.firstname is required");

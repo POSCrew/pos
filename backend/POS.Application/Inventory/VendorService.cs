@@ -61,7 +61,7 @@ public sealed class VendorService : IVendorService
         vendor.PhoneNumber = vendor.PhoneNumber?.Trim() ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(vendor.Code))
-            throw new POSException("vendor.vode is required");
+            throw new POSException("vendor.code is required");
 
         if (string.IsNullOrWhiteSpace(vendor.FirstName))
             throw new POSException("vendor.firstname is required");

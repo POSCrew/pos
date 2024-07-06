@@ -2,8 +2,8 @@
   import {
     faEdit,
     faPlus,
-    faRefresh,
     faSpinner,
+    faRefresh,
     faTrash,
   } from "@fortawesome/free-solid-svg-icons";
   import {
@@ -14,61 +14,57 @@
     TextField,
   } from "ui-commons";
   import Fa from "svelte-fa";
-  import { cloneVendor, Vendor } from "../../../data/Vendor";
+  import { cloneCustomer, Customer } from "../../../data/Customer";
   import { sl } from "../../../di";
-  import {
-    tVendorService,
-    VendorService,
-  } from "../../../services/vendorService";
-  import type { AxiosError } from "axios";
-  import { dialogErrorHandler } from "../../../utils/svelte-utils";
-  let vendorService: VendorService = sl.resolve(tVendorService);
+  import { tCustomerService, type CustomerService } from "../../../services/CustomerService";
+  let customerService: CustomerService = sl.resolve(tCustomerService);
 
   let newDialogOpen = $state(false);
-  let vendor: Vendor = $state(new Vendor("", "", "", "", ""));
+  let customer: Customer = $state(new Customer("", "", "", "", ""));
 
-  let vendorList: Vendor[] = $state([]);
+  let customerList: Customer[] = $state([]);
   let isLoading = $state(true);
   function refreshList() {
     isLoading = true;
-    vendorService.getVendors(0, 100).then((res) => {
-      vendorList = res;
+    customerService.getCustomers(0, 100).then((res) => {
+      customerList = res;
       isLoading = false;
     });
   }
   refreshList();
 
-  function onNewVendor() {
+  function onNewCustomer() {
     newDialogOpen = true;
-    vendor = new Vendor("", "", "", "", "");
+    customer = new Customer("", "", "", "", "");
   }
   function onSave() {
-    (!vendor.id ? vendorService.create(vendor) : vendorService.update(vendor))
-      .then((res) => {
-        refreshList();
-        newDialogOpen = false;
-      })
-      .catch(dialogErrorHandler);
+    (!customer.id
+      ? customerService.create(customer)
+      : customerService.update(customer)
+    ).then((res) => {
+      refreshList();
+      newDialogOpen = false;
+    });
   }
   function onCancel() {
     newDialogOpen = false;
   }
 
-  function editItem(ven: Vendor) {
-    vendor = cloneVendor(ven);
+  function editItem(ven: Customer) {
+    customer = cloneCustomer(ven);
     newDialogOpen = true;
   }
 
-  function deleteItem(ven: Vendor) {
+  function deleteItem(ven: Customer) {
     console.log("delete item ", ven);
 
     DialogUtils.confirmation(
-      `Do you really want to delete this item : ${ven.firstName || ""} ${ven.lastName || ""}?\n`,
+      `Do you really want to delete this item : ${ven.firstName || ""} ${ven.lastName || ''}?\n`,
     ).then((res) => {
       console.log("result : ", res);
 
       if (res === DialogResult.OK) {
-        vendorService.remove(ven.id).then(() => {
+        customerService.remove(ven.id).then(() => {
           refreshList();
         });
       }
@@ -83,7 +79,7 @@
       borderColor="#57bf9a"
       color="#6ff1c4"
       borderThickness="1"
-      on:click={onNewVendor}
+      on:click={onNewCustomer}
     >
       <Fa icon={faPlus} /> New
     </Button>
@@ -111,7 +107,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each vendorList as ven}
+      {#each customerList as ven}
         <!-- content here -->
 
         <tr class="bg-white border-b">
@@ -153,37 +149,37 @@
 </div>
 <Dialog bind:isOpen={newDialogOpen}>
   <div class="min-w-96 min-h-60 overflow-y-auto">
-    <h2>{vendor.id ? "Edit" : "New"} Vendor:</h2>
+    <h2>{customer.id ? "Edit" : "New"} Customer:</h2>
 
     <TextField
       type="text"
       label="First Name :"
       placeholder="First Name"
-      bind:value={vendor.firstName}
+      bind:value={customer.firstName}
     />
     <TextField
       type="text"
       label="Last Name :"
       placeholder="Last Name"
-      bind:value={vendor.lastName}
+      bind:value={customer.lastName}
     />
     <TextField
       type="text"
       label="Code :"
       placeholder="Code"
-      bind:value={vendor.code}
+      bind:value={customer.code}
     />
     <TextField
       type="tel"
-      label="Phone number :"
+      label="phone number :"
       placeholder="Phone number"
-      bind:value={vendor.phoneNumber}
+      bind:value={customer.phoneNumber}
     />
     <TextField
       type="text"
       label="Address :"
       placeholder="Address"
-      bind:value={vendor.address}
+      bind:value={customer.address}
     />
     <div class="h-2"></div>
     <div class="flex">
