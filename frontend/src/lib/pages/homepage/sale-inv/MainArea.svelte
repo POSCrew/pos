@@ -4,11 +4,22 @@
   import {
     faChevronDown,
     faChevronUp,
+    faList,
+    faSave,
     faTrash,
   } from "@fortawesome/free-solid-svg-icons";
   import type { Item } from "../../../data/Item";
   import { untrack } from "svelte";
   import { flip } from "svelte/animate";
+  import { Button, DatePicker, NumberField } from "ui-commons";
+  import { isoDate } from "../../../utils/dateUtils";
+  import { sl } from "../../../di";
+  import {
+    SaleInvoiceService,
+    tSaleInvoiceService,
+  } from "../../../services/SaleInvoiceService";
+
+  const invoiceService: SaleInvoiceService = sl.resolve(tSaleInvoiceService);
 
   let { customer, item } = $props<{ customer: Customer; item: Item }>();
   let invoiceItems = $state([]);
@@ -21,7 +32,7 @@
         });
         if (!currentItem) {
           invoiceItems.push({
-            rowNumber: invoiceItems.length,
+            rowNumber: invoiceItems.length+1,
             itemId: item.id,
             itemTitle: item.title,
             itemSerial: item.serial,
@@ -53,53 +64,111 @@
     invoiceItems[i + 1] = invoiceItems[i];
     invoiceItems[i] = temp;
   }
+  let invoiceDate = $state(isoDate(new Date().toISOString()));
+  let invoiceNumber: number = $state();
+
+  function save() {
+    invoiceService
+      .create({
+        number: invoiceNumber,
+        date: new Date(invoiceDate),
+        customerId: customer.id,
+        invoiceItems,
+      })
+      .then((res) => {
+        console.log(res);
+      });
+  }
 </script>
 
-<table class="w-full text-sm text-left rtl:text-right text-gray-500">
-  <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-    <tr>
-      <th scope="col" class="px-6 py-3"> Row number</th>
-      <th scope="col" class="px-6 py-3"> Item serial </th>
-      <th scope="col" class="px-6 py-3"> Item title</th>
-      <th scope="col" class="px-6 py-3"> Quantity </th>
-      <th scope="col" class="px-6 py-3"> Price </th>
-      <th scope="col" class="px-6 py-3"> Fee </th>
-      <th scope="col" class="px-6 py-3"> Delete </th>
-    </tr>
-  </thead>
+<div class="flex flex-col h-full overflow-y-auto">
+  <div class="grow flex flex-col">
+    <div class="m-8 p-4 border-[1.5px] rounded-sm border-gray-400 flex-grow-0">
+      <h3 class="outline-none">
+        Customer Name: {#if customer}
+          <!-- content here -->
 
-  <tbody>
-    {#each invoiceItems as invItem, i (invItem.itemId)}
-      <tr class="bg-white border-b" animate:flip={{}}>
-        <th
-          scope="row"
-          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex justify-center"
-        >
-          <div class="mr-1">
-            <div on:click={() => moveUp(i)}>
-              <Fa icon={faChevronUp} />
-            </div>
-            <div on:click={() => moveDown(i)}>
-              <Fa icon={faChevronDown} />
-            </div>
-          </div>
-        </th>
-        <td class="px-6 py-4"> {invItem.itemSerial} </td>
-        <td class="px-6 py-4"> {invItem.itemTitle} </td>
-        <td class="px-6 py-4"> {invItem.quantity} </td>
-        <td class="px-6 py-4"> {invItem.price} </td>
-        <td class="px-6 py-4"> {invItem.price * invItem.quantity} </td>
-        <td class="px-6 py-4">
-          <div class="flex gap-1 ops">
-            <div on:click={() => deleteItem(i)}>
-              <Fa
-                icon={faTrash}
-                color="red"
-                class="hover:scale-125 transition-all cursor-pointer"
-              />
-            </div>
-          </div>
-        </td>
-      </tr>{/each}
-  </tbody>
-</table>
+          {customer?.code || "(...)"} - {customer
+            ? customer.firstName || "" + customer.lastName || ""
+            : "(...)"}
+        {/if}
+      </h3>
+      <div class="flex gap-2">
+        <DatePicker bind:value={invoiceDate} label="Invoive Date : " />
+        <NumberField bind:value={invoiceNumber} label="Invoice number : " />
+      </div>
+    </div>
+
+    <div class="h-0 grow overflow-y-auto">
+      <table class="text-sm text-left rtl:text-right text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3"> Row number</th>
+            <th scope="col" class="px-6 py-3"> Item serial </th>
+            <th scope="col" class="px-6 py-3"> Item title</th>
+            <th scope="col" class="px-6 py-3"> Quantity </th>
+            <th scope="col" class="px-6 py-3"> Price </th>
+            <th scope="col" class="px-6 py-3"> Fee </th>
+            <th scope="col" class="px-6 py-3"> Delete </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {#each invoiceItems as invItem, i (invItem.itemId)}
+            <tr class="bg-white border-b" animate:flip={{}}>
+              <th
+                scope="row"
+                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex justify-center"
+              >
+                <div class="mr-1">
+                  <div on:click={() => moveUp(i)}>
+                    <Fa icon={faChevronUp} />
+                  </div>
+                  <div on:click={() => moveDown(i)}>
+                    <Fa icon={faChevronDown} />
+                  </div>
+                </div>
+              </th>
+              <td class="px-6 py-4"> {invItem.itemSerial} </td>
+              <td class="px-6 py-4"> {invItem.itemTitle} </td>
+              <td class="px-6 py-4">
+                <NumberField bind:value={invItem.quantity} />
+              </td>
+              <td class="px-6 py-4">
+                <NumberField bind:value={invItem.price} />
+              </td>
+              <td class="px-6 py-4"> {invItem.price * invItem.quantity} </td>
+              <td class="px-6 py-4">
+                <div class="flex gap-1 ops">
+                  <div on:click={() => deleteItem(i)}>
+                    <Fa
+                      icon={faTrash}
+                      color="red"
+                      class="hover:scale-125 transition-all cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </td>
+            </tr>{/each}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="flex-grow-0 border-t-2 p-2 px-6 flex items-center">
+    <Button color="#eee">
+      <Fa icon={faList} />
+      List
+    </Button>
+    <div class="mr-auto"></div>
+    <Button color="#a8fe95" on:click={save}>
+      <Fa icon={faSave} /> Save
+    </Button>
+  </div>
+</div>
+
+<style>
+  button {
+    color: #a8fe95;
+  }
+</style>
