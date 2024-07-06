@@ -8,7 +8,7 @@ public static class SalesReviewEndpoints
 {
     public static void AddSalesReviewEndpoints(this IEndpointRouteBuilder routes)
     {
-        var salesReview = routes.MapGroup("reivew")
+        var salesReview = routes.MapGroup("review")
             .RequireAuthorization(PosIdentity.AdminPolicy);
         
         salesReview.MapPost("profit", ItemsSheet);

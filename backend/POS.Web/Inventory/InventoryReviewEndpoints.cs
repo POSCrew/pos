@@ -8,7 +8,7 @@ public static class InventoryReviewEndpoints
 {
     public static void AddInventoryReviewEndpoints(this IEndpointRouteBuilder routes)
     {
-        var inventoryReview = routes.MapGroup("reivew")
+        var inventoryReview = routes.MapGroup("review")
             .RequireAuthorization(PosIdentity.AdminPolicy);
         
         inventoryReview.MapPost("items", ItemsSheet);
