@@ -2,6 +2,7 @@ export class SalesReviewProfit{
     invoiceItemID: number;
     invoiceType: string;
     invoiceNumber: number;
+    invoiceDescription: string;
     invoiceDay: Date;
     invoiceDate: Date;
     itemID: number;

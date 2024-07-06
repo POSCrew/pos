@@ -77,6 +77,7 @@
         <th scope="col" class="px-6 py-3"> Invoice Number</th>
         <!-- <th scope="col" class="px-6 py-3"> InvoiceDay</th> -->
         <th scope="col" class="px-6 py-3"> Invoice Date</th>
+        <th scope="col" class="px-6 py-3"> Invoice Description</th>
         <!-- <th scope="col" class="px-6 py-3"> ItemID</th> -->
         <th scope="col" class="px-6 py-3"> Item Serial</th>
         <th scope="col" class="px-6 py-3"> Item Title</th>
@@ -104,6 +105,7 @@
             {new Date(ven.invoiceDate).toLocaleString()}
           </td>
           <!-- <td class="px-6 py-4"> {ven.itemID} </td> -->
+          <td class="px-6 py-4"> {ven.invoiceDescription} </td>
           <td class="px-6 py-4"> {ven.itemSerial} </td>
           <td class="px-6 py-4"> {ven.itemTitle} </td>
           <td class="px-6 py-4"> {ven.invoiceItemQuantity} </td>
@@ -118,6 +120,7 @@
         <!-- <td class="px-6 py-4"> {ven.invoiceDay} </td> -->
         <td class="px-6 py-4"></td>
         <!-- <td class="px-6 py-4"> {ven.itemID} </td> -->
+        <td class="px-6 py-4"></td>
         <td class="px-6 py-4"></td>
         <td class="px-6 py-4"></td>
         <td class="px-6 py-4">

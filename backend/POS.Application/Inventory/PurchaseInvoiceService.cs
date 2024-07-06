@@ -50,6 +50,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
         {
             Date = new DateTime(invoice.Date.Year, invoice.Date.Month, invoice.Date.Day, invoice.Date.Hour, invoice.Date.Minute, invoice.Date.Second),
             Number = invoice.Number ?? await GetMaxNumber() + 1,
+            Description = invoice.Description ?? "",
             Vendor = await GetVendor(invoice.VendorId),
             CreatorID = userId,
             InvoiceItems = new List<PurchaseInvoiceItem>(invoice.InvoiceItems.Count)
@@ -106,6 +107,7 @@ public sealed class PurchaseInvoiceService : IPurchaseInvoiceService
             throw new POSException("invalid id");
 
         previousInvoice.Number = invoice.Number ?? await GetMaxNumber() + 1;
+        previousInvoice.Description = invoice.Description ?? "";
         previousInvoice.Date = new DateTime(invoice.Date.Year, invoice.Date.Month, invoice.Date.Day, invoice.Date.Hour, invoice.Date.Minute, invoice.Date.Second);
 
         if(await _pricingService.IsThereAnyPricingInDate(previousInvoice.Date))

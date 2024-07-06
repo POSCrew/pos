@@ -7,6 +7,7 @@ public sealed class SaleInvoice : BaseEntity
 {
     public DateTime Date { get; set; }
     public int Number { get; set; }
+    [MaxLength(300)] public string Description { get; set; } = "";
     [DataType("DECIMAL(19, 4)")] public decimal TotalPrice { get; set; }
     public Customer Customer { get; set; } = null!;
     [MaxLength(450)] public string CreatorID { get; set; } = null!;
@@ -27,6 +28,7 @@ public sealed class CreateSaleInvoiceRequest
 {
     public DateTime Date { get; set; }
     public int? Number { get; set; }
+    public string Description { get; set; } = "";
     public int? CustomerId { get; set; }
     public List<CreateSaleInvoiceItemRequest> InvoiceItems { get; set; } = [];
 }
@@ -44,6 +46,7 @@ public sealed class UpdateSaleInvoiceRequest
     public int ID { get; set; }
     public DateTime Date { get; set; }
     public int? Number { get; set; }
+    public string Description { get; set; } = "";
     public int? CustomerId { get; set; }
     public List<UpdateSaleInvoiceItemRequest> InvoiceItems { get; set; } = [];
 }

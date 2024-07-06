@@ -6,6 +6,7 @@ public sealed class PurchaseInvoice : BaseEntity
 {
     public DateTime Date { get; set; }
     public int Number { get; set; }
+    [MaxLength(300)] public string Description { get; set; } = "";
     [DataType("DECIMAL(19, 4)")] public decimal TotalPrice { get; set; }
     public Vendor Vendor { get; set; } = null!;
     [MaxLength(450)] public string CreatorID { get; set; } = null!;
@@ -26,6 +27,7 @@ public sealed class CreatePurchaseInvoiceRequest
 {
     public DateTime Date { get; set; }
     public int? Number { get; set; }
+    public string Description { get; set; } = "";
     public int? VendorId { get; set; }
     public List<CreatePurchaseInvoiceItemRequest> InvoiceItems { get; set; } = [];
 }
@@ -43,6 +45,7 @@ public sealed class UpdatePurchaseInvoiceRequest
     public int ID { get; set; }
     public DateTime Date { get; set; }
     public int? Number { get; set; }
+    public string Description { get; set; } = "";
     public int? VendorId { get; set; }
     public List<UpdatePurchaseInvoiceItemRequest> InvoiceItems { get; set; } = [];
 }

@@ -97,6 +97,7 @@
         <!-- <th scope="col" class="px-6 py-3"> InvoiceDay</th> -->
         <th scope="col" class="px-6 py-3"> Invoice Number</th>
         <th scope="col" class="px-6 py-3"> Invoice Date</th>
+        <th scope="col" class="px-6 py-3"> Invoice Description</th>
         <th scope="col" class="px-6 py-3"> Invoice Quantity</th>
         <th scope="col" class="px-6 py-3"> Invoice Fee</th>
         <th scope="col" class="px-6 py-3"> Invoice Price</th>
@@ -121,6 +122,7 @@
           <td class="px-6 py-4">
             {new Date(ven.invoiceDate).toLocaleString()}
           </td>
+          <td class="px-6 py-4"> {ven.invoiceDescription} </td>
           <td class="px-6 py-4"> {ven.invoiceQuantity} </td>
           <td class="px-6 py-4"> {ven.invoiceFee} </td>
           <td class="px-6 py-4"> {ven.invoicePrice} </td>

@@ -27,6 +27,7 @@ SELECT
     END AS InvoiceType,
     Invoices.[Day] AS InvoiceDay,
     Invoices.[Date] AS InvoiceDate,
+    Invoices.Description AS InvoiceDescription,
     Invoices.Number AS InvoiceNumber,
     Invoices.InvoiceQuantity,
     Invoices.Price AS InvoicePrice,
@@ -34,13 +35,13 @@ SELECT
     SUM(Invoices.InvoiceQuantity) OVER (PARTITION BY Invoices.ItemID ORDER BY Invoices.[Day] ASC, [Type] ASC) AS RunningQuantity
 FROM
 (
-    SELECT CAST(P.[Date] AS Date) AS [Day], P.[Date], P.Number, PI.ItemID, PI.Quantity AS InvoiceQuantity, PI.Price, PI.Fee, 0 AS [Type]
+    SELECT CAST(P.[Date] AS Date) AS [Day], P.[Date], P.Description, P.Number, PI.ItemID, PI.Quantity AS InvoiceQuantity, PI.Price, PI.Fee, 0 AS [Type]
     FROM PurchaseInvoiceItem PI
     INNER JOIN PurchaseInvoices P ON PI.PurchaseInvoiceID = P.ID
 
     UNION ALL
 
-    SELECT CAST(S.[Date] AS Date) AS [Day], S.[Date], S.Number, SI.ItemID, -SI.Quantity AS InvoiceQuantity, -SI.Price, -SI.Fee, 1 AS [Type]
+    SELECT CAST(S.[Date] AS Date) AS [Day], S.[Date], S.Description, S.Number, SI.ItemID, -SI.Quantity AS InvoiceQuantity, -SI.Price, -SI.Fee, 1 AS [Type]
     FROM SaleInvoiceItem SI
     INNER JOIN SaleInvoices S ON SI.SaleInvoiceID = S.ID
 ) Invoices
@@ -59,6 +60,7 @@ public sealed class InventoryReviewItems
     public string? InvoiceType { get; set; }
     public DateTime InvoiceDay { get; set; }
     public DateTime InvoiceDate { get; set; }
+    public string? InvoiceDescription { get; set; }
     public int InvoiceNumber { get; set; }
     public decimal InvoiceQuantity { get; set; }
     public decimal InvoicePrice { get; set; }

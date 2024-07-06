@@ -5,6 +5,7 @@ export class InventoryReviewItems{
     invoiceType: string;
     invoiceDay: Date;
     invoiceDate: Date;
+    invoiceDescription: string;
     invoiceNumber: number;
     invoiceQuantity: number;
     invoicePrice: number;

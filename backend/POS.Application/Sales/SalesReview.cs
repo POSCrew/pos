@@ -32,6 +32,7 @@ WITH InvoiceItems AS (
         P.Number as InvoiceNumber,
         CAST(P.[Date] AS Date) AS InvoiceDay,
         P.[Date] AS InvoiceDate,
+        P.Description AS InvoiceDescription,
         PI.ItemID,
         IT.Serial AS ItemSerial,
         IT.Title AS ItemTitle,
@@ -54,6 +55,7 @@ WITH InvoiceItems AS (
         S.Number as InvoiceNumber,
         CAST(S.[Date] AS Date) AS InvoiceDay,
         S.[Date] AS InvoiceDate,
+        S.Description AS InvoiceDescription,
         SI.ItemID,
         IT.Serial AS ItemSerial,
         IT.Title AS ItemTitle,
@@ -83,6 +85,7 @@ public sealed class SalesReviewProfit
     public int InvoiceNumber { get; set; }
     public DateTime InvoiceDay { get; set; }
     public DateTime InvoiceDate { get; set; }
+    public string? InvoiceDescription { get; set; }
     public int ItemID { get; set; }
     public string? ItemSerial { get; set; }
     public string? ItemTitle { get; set; }
