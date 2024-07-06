@@ -1,50 +1,52 @@
 <script lang="ts">
   import {
-  faArrowLeft,
-    faArrowRight,
     faEdit,
     faPlus,
     faRefresh,
     faSpinner,
+    faRemove,
     faTrash,
+    faArrowLeft,
+    faArrowRight,
   } from "@fortawesome/free-solid-svg-icons";
   import {
     Button,
+    DatePicker,
     Dialog,
     DialogResult,
     DialogUtils,
     TextField,
   } from "ui-commons";
   import Fa from "svelte-fa";
-  import { cloneVendor, Vendor } from "../../../data/Vendor";
+  import { Pricing } from "../../../data/Pricing";
   import { sl } from "../../../di";
-  import {
-    tVendorService,
-    VendorService,
-  } from "../../../services/vendorService";
   import type { AxiosError } from "axios";
   import { dialogErrorHandler } from "../../../utils/svelte-utils";
-  let vendorService: VendorService = sl.resolve(tVendorService);
+  import {
+    tPricingService,
+    type PricingService,
+  } from "../../../services/PricingService";
+  let pricingService: PricingService = sl.resolve(tPricingService);
 
   let newDialogOpen = $state(false);
-  let vendor: Vendor = $state(new Vendor("", "", "", "", ""));
+  let pricing: Pricing = $state(new Pricing(new Date(), new Date()));
 
   let pageSize = 10;
   let currentPage: number = $state(1);
   let totalPages: number = $state(1);
 
-  let vendorList: Vendor[] = $state([]);
+  let pricingList: Pricing[] = $state([]);
   let isLoading = $state(true);
   function refreshList() {
     isLoading = true;
 
-    vendorService.getCount().then((res) => {
+    pricingService.getCount().then((res) => {
       totalPages = Math.ceil(res / pageSize);
       if (currentPage > totalPages) currentPage = 0;
     });
 
-    vendorService.getVendors(currentPage - 1, pageSize).then((res) => {
-      vendorList = res;
+    pricingService.getPricings(currentPage - 1, pageSize).then((res) => {
+      pricingList = res;
       isLoading = false;
     });
   }
@@ -60,15 +62,15 @@
     refreshList();
   }
 
-  function onNewVendor() {
+  async function onNewPricing() {
     newDialogOpen = true;
-    vendor = new Vendor("", "", "", "", "");
+    pricing = new Pricing(
+      await pricingService.getNewPricingStartDate(),
+      new Date(new Date().toLocaleDateString()),
+    );
   }
   function onSave() {
-    (!vendor.id
-      ? vendorService.create(vendor)
-      : vendorService.update(vendor)
-    ).then((res) => {
+    pricingService.create(pricing).then((res) => {
       refreshList();
       newDialogOpen = false;
     });
@@ -77,21 +79,12 @@
     newDialogOpen = false;
   }
 
-  function editItem(ven: Vendor) {
-    vendor = cloneVendor(ven);
-    newDialogOpen = true;
-  }
-
-  function deleteItem(ven: Vendor) {
-    console.log("delete item ", ven);
-
+  function deleteItem() {
     DialogUtils.confirmation(
-      `Do you really want to delete this item : ${ven.firstName || ""} ${ven.lastName || ""}?\n`,
+      `Do you really want to delete last pricing?\n`,
     ).then((res) => {
-      console.log("result : ", res);
-
       if (res === DialogResult.OK) {
-        vendorService.remove(ven.id).then(() => {
+        pricingService.removeLastPricing().then(() => {
           refreshList();
         });
       }
@@ -106,9 +99,19 @@
       borderColor="#57bf9a"
       color="#6ff1c4"
       borderThickness="1"
-      on:click={onNewVendor}
+      on:click={onNewPricing}
     >
       <Fa icon={faPlus} /> New
+    </Button>
+    <div class="m-1" />
+    <Button
+      hoverColor="#f16f6fbb"
+      borderColor="#cf8c8c"
+      color="#ed9a9a"
+      borderThickness="1"
+      on:click={deleteItem}
+    >
+      <Fa icon={faRemove} /> Remove Last Pricing
     </Button>
     <div class="m-1" />
     <Button
@@ -125,45 +128,18 @@
   <table class="w-full text-sm text-left rtl:text-right text-gray-500">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
       <tr>
-        <th scope="col" class="px-6 py-3"> Full name</th>
-        <th scope="col" class="px-6 py-3"> Code </th>
-        <th scope="col" class="px-6 py-3"> Phone Number</th>
-        <th scope="col" class="px-6 py-3"> Address </th>
-        <th scope="col" class="px-6 py-3"> Operation </th>
+        <th scope="col" class="px-6 py-3"> Start Date</th>
+        <th scope="col" class="px-6 py-3"> End Date </th>
       </tr>
     </thead>
     <tbody>
-      {#each vendorList as ven}
+      {#each pricingList as ven}
         <!-- content here -->
-
         <tr class="bg-white border-b">
-          <th
-            scope="row"
-            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-          >
-            {ven.firstName}
-            {ven.lastName}
-          </th>
-          <td class="px-6 py-4"> {ven.code} </td>
-          <td class="px-6 py-4"> {ven.phoneNumber} </td>
-          <td class="px-6 py-4"> {ven.address} </td>
-          <td class="px-6 py-4">
-            <div class="flex gap-1 ops">
-              <div on:click={() => editItem(ven)}>
-                <Fa
-                  icon={faEdit}
-                  class="hover:scale-125 transition-all cursor-pointer"
-                />
-              </div>
-              <div on:click={() => deleteItem(ven)}>
-                <Fa
-                  icon={faTrash}
-                  color="red"
-                  class="hover:scale-125 transition-all cursor-pointer"
-                />
-              </div>
-            </div>
+          <td scope="row" class="px-6 py-4">
+            {new Date(ven.startDate).toLocaleString()}
           </td>
+          <td class="px-6 py-4"> {new Date(ven.endDate).toLocaleString()} </td>
         </tr>{/each}
     </tbody>
   </table>
@@ -201,41 +177,17 @@
 </div>
 <Dialog bind:isOpen={newDialogOpen}>
   <div class="min-w-96 min-h-60 overflow-y-auto">
-    <h2>{vendor.id ? "Edit" : "New"} Vendor:</h2>
+    <h2>{pricing.id ? "Edit" : "New"} Pricing:</h2>
 
-    <TextField
-      type="text"
-      label="First Name :"
-      placeholder="First Name"
-      bind:value={vendor.firstName}
+    <DatePicker
+      label="Start Date :"
+      disabled={true}
+      value={new Date(pricing.startDate).toISOString().substring(0, 10)}
     />
-    <TextField
-      type="text"
-      label="Last Name :"
-      placeholder="Last Name"
-      bind:value={vendor.lastName}
-    />
-    <TextField
-      type="text"
-      label="Code :"
-      placeholder="Code"
-      bind:value={vendor.code}
-    />
-    <TextField
-      type="tel"
-      label="Phone number :"
-      placeholder="Phone number"
-      bind:value={vendor.phoneNumber}
-    />
-    <TextField
-      type="text"
-      label="Address :"
-      placeholder="Address"
-      bind:value={vendor.address}
-    />
+    <DatePicker label="End Date :" bind:value={pricing.endDate} />
     <div class="h-2"></div>
     <div class="flex">
-      <Button on:click={onSave}>Save</Button>
+      <Button on:click={onSave}>Do Pricing</Button>
       <Button on:click={onCancel}>Cancel</Button>
     </div>
   </div>

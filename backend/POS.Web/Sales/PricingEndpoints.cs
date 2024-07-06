@@ -13,7 +13,7 @@ public static class PricingEndpoints
 
         pricings.MapPost("/", Create);
         pricings.MapGet("newPricingStartDate", NewPricingStartDate);
-        pricings.MapDelete("/", Remove);
+        pricings.MapDelete("/", RemoveLastPricing);
         pricings.MapGet("all", GetAll);
         pricings.MapGet("count", GetCount);
     }
@@ -25,12 +25,11 @@ public static class PricingEndpoints
         return await pricingService.GetNewPricingStartDate();
     }
 
-    private static Task Remove(
-        [FromServices] IPricingService pricingService,
-        [FromQuery] int id
+    private static Task RemoveLastPricing(
+        [FromServices] IPricingService pricingService
     )
     {
-        return pricingService.Remove(id);
+        return pricingService.RemoveLastPricing();
     }
 
     public sealed record DoPricingRequest(DateTime StartDate, DateTime EndDate);
