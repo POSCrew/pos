@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Injectable } from "container-ioc";
 import { API_ROOT_URL, Constants } from "../config/config";
+import { dialogErrorHandler } from "../utils/svelte-utils";
 
 axios.interceptors.request.use(
   (config) => {
@@ -15,6 +16,10 @@ axios.interceptors.request.use(
     return Promise.reject(error);
   },
 );
+axios.interceptors.response.use(undefined, (error) => {
+  dialogErrorHandler(error);
+  return Promise.reject(error);
+});
 
 export const tHttpModule = Symbol("http");
 @Injectable()

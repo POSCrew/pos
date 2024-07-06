@@ -43,12 +43,13 @@
     vendor = new Vendor("", "", "", "", "");
   }
   function onSave() {
-    (!vendor.id ? vendorService.create(vendor) : vendorService.update(vendor))
-      .then((res) => {
-        refreshList();
-        newDialogOpen = false;
-      })
-      .catch(dialogErrorHandler);
+    (!vendor.id
+      ? vendorService.create(vendor)
+      : vendorService.update(vendor)
+    ).then((res) => {
+      refreshList();
+      newDialogOpen = false;
+    });
   }
   function onCancel() {
     newDialogOpen = false;
@@ -87,8 +88,7 @@
     >
       <Fa icon={faPlus} /> New
     </Button>
-  <div class="ml-2 mb-2 inline-flex">
-  </div>
+    <div class="ml-2 mb-2 inline-flex"></div>
     <Button
       hoverColor="#6ff1c4bb"
       borderColor="#57bf9a"
@@ -96,7 +96,7 @@
       borderThickness="1"
       on:click={refreshList}
     >
-      <Fa icon={faRefresh} /> 
+      <Fa icon={faRefresh} />
     </Button>
   </div>
 
