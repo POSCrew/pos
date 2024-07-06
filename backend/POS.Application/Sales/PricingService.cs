@@ -38,7 +38,6 @@ public sealed class PricingService : IPricingService
             throw new POSException("end date should be after start date in pricing");
 
         var relatedInvoiceItems = await _repository.ExecuteRawSql<PricingRelatedInvoice>($"""
-DECLARE @StartDate DATETIME = {startDate};
 DECLARE @EndDate DATETIME = {endDate};
 
 WITH InvoiceItems AS (
@@ -54,6 +53,7 @@ WITH InvoiceItems AS (
 )
 SELECT *
 FROM InvoiceItems
+WHERE InvoiceDate <= @EndDate
 ORDER BY InvoiceItems.ItemID ASC, InvoiceItems.InvoiceDate ASC, InvoiceItems.InvoiceType ASC, InvoiceItems.InvoiceNumber ASC
 """);
         List<InvoiceAveragePurchasePrice> averagePrices = [];

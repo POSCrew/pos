@@ -89,8 +89,8 @@ public sealed class SalesReviewProfit
     public decimal InvoiceItemQuantity { get; set; }
     public decimal InvoiceItemFee { get; set; }
     public decimal InvoiceItemPrice { get; set; }
-    public decimal AveragePurchaseFee { get; set; }
-    public decimal Profit { get; set; }
+    public decimal? AveragePurchaseFee { get; set; }
+    public decimal? Profit { get; set; }
 }
 
 public sealed class SalesReviewFilter

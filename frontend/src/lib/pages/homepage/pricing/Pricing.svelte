@@ -182,7 +182,7 @@
     <DatePicker
       label="Start Date :"
       disabled={true}
-      value={new Date(pricing.startDate).toISOString().substring(0, 10)}
+      value={new Date(pricing.startDate).getFullYear()+'-'+String(new Date(pricing.startDate).getMonth() + 1).padStart(2, '0')+'-'+String(new Date(pricing.startDate).getDate()).padStart(2, '0')}
     />
     <DatePicker label="End Date :" bind:value={pricing.endDate} />
     <div class="h-2"></div>
