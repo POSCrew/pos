@@ -17,5 +17,5 @@ function setCssVariables(node, variables) {
 }
 
 export function dialogErrorHandler(err: AxiosError) {
-  DialogUtils.error(err.response.data.Title, "Server Error!");
+  DialogUtils.error(err.response.data.title, "Server Error!");
 }
