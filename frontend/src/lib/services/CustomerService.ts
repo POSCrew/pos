@@ -18,7 +18,7 @@ export class CustomerService {
     return (await this.http.get(url, {params: {id}})).data as Customer;
   }
 
-  async getCustomers(page:number, pageSize:number){
+  async getCustomers(page:number=null, pageSize:number=null){
     const url = this.http.url("sales/customers/all")
 
     return (await this.http.get(url, {params:{page, pageSize}})).data as Customer[];

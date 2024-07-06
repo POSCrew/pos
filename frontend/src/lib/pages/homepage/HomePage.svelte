@@ -2,8 +2,8 @@
   import { Button, Space } from "ui-commons";
   import { faHouse, faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
-  import NavigationMenu from "./NavigationMenu.svelte";
-  import MainArea from "./MainArea.svelte";
+  import NavigationMenu from "./sale-inv/NavigationMenu.svelte";
+  import MainArea from "./sale-inv/MainArea.svelte";
   import { onMount } from "svelte";
   import { navigate, Route, Router } from "svelte-navigator";
   import { AuthService, tAuthService } from "../../services/AuthService";

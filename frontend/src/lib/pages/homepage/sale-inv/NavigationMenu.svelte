@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Item } from "../../data/Item";
+  import type { Item } from "../../../data/Item";
 
   
   let {items} = $props<{items: Item[]}>();

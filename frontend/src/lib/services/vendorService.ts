@@ -18,7 +18,7 @@ export class VendorService {
     return (await this.http.get(url, {params: {id}})).data as Vendor;
   }
 
-  async getVendors(page:number, pageSize:number){
+  async getVendors(page:number=null, pageSize:number=null){
     const url = this.http.url("inventory/vendors/all")
 
     return (await this.http.get(url, {params:{page, pageSize}})).data as Vendor[];

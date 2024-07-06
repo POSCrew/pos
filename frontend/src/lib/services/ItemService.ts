@@ -18,7 +18,7 @@ export class ItemService {
     return (await this.http.get(url, {params: {id}})).data as Item;
   }
 
-  async getItems(page:number, pageSize:number){
+  async getItems(page:number=null, pageSize:number=null){
     const url = this.http.url("inventory/items/all")
 
     return (await this.http.get(url, {params:{page, pageSize}})).data as Item[];
