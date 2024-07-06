@@ -1,8 +1,19 @@
 <script lang="ts">
-  import { faPlus } from "@fortawesome/free-solid-svg-icons";
-  import { Button, Dialog, DialogUtils, TextField } from "ui-commons";
+  import {
+    faEdit,
+    faPlus,
+    faSpinner,
+    faTrash,
+  } from "@fortawesome/free-solid-svg-icons";
+  import {
+    Button,
+    Dialog,
+    DialogResult,
+    DialogUtils,
+    TextField,
+  } from "ui-commons";
   import Fa from "svelte-fa";
-  import type { Vendor } from "../../../data/Vendor";
+  import { cloneVendor, Vendor } from "../../../data/Vendor";
   import { sl } from "../../../di";
   import {
     tVendorService,
@@ -11,29 +22,51 @@
   let vendorService: VendorService = sl.resolve(tVendorService);
 
   let newDialogOpen = $state(false);
-  let vendor: Vendor = $state({
-    code: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    phoneNumber: "",
-  });
+  let vendor: Vendor = $state(new Vendor("", "", "", "", ""));
 
   let vendorList: Vendor[] = $state([]);
+  let isLoading = $state(true);
   function refreshList() {
+    isLoading = true;
     vendorService.getVendors(0, 100).then((res) => {
       vendorList = res;
+      isLoading = false;
     });
   }
   refreshList();
 
   function onNewVendor() {
     newDialogOpen = true;
+    vendor = new Vendor("", "", "", "", "");
   }
   function onSave() {
-    vendorService.create(vendor).then((res) => {
+    (!vendor.id
+      ? vendorService.create(vendor)
+      : vendorService.update(vendor)
+    ).then((res) => {
       refreshList();
       newDialogOpen = false;
+    });
+  }
+
+  function editItem(ven: Vendor) {
+    vendor = cloneVendor(ven);
+    newDialogOpen = true;
+  }
+
+  function deleteItem(ven: Vendor) {
+    console.log("delete item ", ven);
+
+    DialogUtils.confirmation(
+      `Do you really want to delete this item : ${ven.firstName || ""} ${ven.lastName || ''}?\n`,
+    ).then((res) => {
+      console.log("result : ", res);
+
+      if (res === DialogResult.OK) {
+        vendorService.remove(ven.id).then(() => {
+          refreshList();
+        });
+      }
     });
   }
 </script>
@@ -58,6 +91,7 @@
         <th scope="col" class="px-6 py-3"> Code </th>
         <th scope="col" class="px-6 py-3"> Phone Number</th>
         <th scope="col" class="px-6 py-3"> Address </th>
+        <th scope="col" class="px-6 py-3"> Operation </th>
       </tr>
     </thead>
     <tbody>
@@ -75,13 +109,35 @@
           <td class="px-6 py-4"> {ven.code} </td>
           <td class="px-6 py-4"> {ven.phoneNumber} </td>
           <td class="px-6 py-4"> {ven.address} </td>
+          <td class="px-6 py-4">
+            <div class="flex gap-1 ops">
+              <div on:click={() => editItem(ven)}>
+                <Fa
+                  icon={faEdit}
+                  class="hover:scale-125 transition-all cursor-pointer"
+                />
+              </div>
+              <div on:click={() => deleteItem(ven)}>
+                <Fa
+                  icon={faTrash}
+                  color="red"
+                  class="hover:scale-125 transition-all cursor-pointer"
+                />
+              </div>
+            </div>
+          </td>
         </tr>{/each}
     </tbody>
   </table>
+  {#if isLoading}
+    <div class="flex justify-center items-center mt-4">
+      <Fa icon={faSpinner} size="3x" spin />
+    </div>
+  {/if}
 </div>
-<Dialog isOpen={newDialogOpen}>
+<Dialog bind:isOpen={newDialogOpen}>
   <div class="min-w-96 min-h-60 overflow-y-auto">
-    <h2>New Vendor:</h2>
+    <h2>{vendor.id ? "Edit" : "New"} Vendor:</h2>
 
     <TextField
       type="text"
@@ -118,8 +174,10 @@
   </div>
 </Dialog>
 
-<style>
-  butto {
-    color: #57bf9a;
+<style lang="postcss">
+  .ops {
+    svg {
+      @apply hover:scale-125 transition-all cursor-pointer;
+    }
   }
 </style>
