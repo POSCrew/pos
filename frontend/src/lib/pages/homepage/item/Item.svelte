@@ -11,6 +11,7 @@
       Dialog,
       DialogResult,
       DialogUtils,
+      NumberField,
       TextField,
     } from "ui-commons";
     import Fa from "svelte-fa";
@@ -167,11 +168,10 @@
         placeholder="Description"
         bind:value={item.description}
       />
-      <TextField
-        type="text"
+      <NumberField
         label="Sale Price:"
         placeholder="0"
-        bind:value={item.salePriceStr}
+        bind:value={item.salePrice}
       />
       <div class="h-2"></div>
       <div class="flex">
