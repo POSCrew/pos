@@ -9,5 +9,5 @@ public interface IPricingService
     Task<bool> IsThereAnyPricingInDate(DateTime date);
     Task<List<Pricing>> GetAll(int? page, int? pageSize);
     Task<int> GetCount();
-    Task Remove(int id);
+    Task RemoveLastPricing();
 }

@@ -30,9 +30,9 @@ export class PricingService {
     return (await this.http.get(url)).data as number;
   }
 
-  async remove(id: number){
+  async removeLastPricing(){
     const url = this.http.url("sales/pricings");
 
-    await this.http.delet(url, {params: {id}});
+    await this.http.delet(url);
   }
 }

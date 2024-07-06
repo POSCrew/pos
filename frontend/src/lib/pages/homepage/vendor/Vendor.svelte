@@ -88,7 +88,7 @@
     >
       <Fa icon={faPlus} /> New
     </Button>
-    <div class="ml-2 mb-2 inline-flex"></div>
+    <div class="m-1" />
     <Button
       hoverColor="#6ff1c4bb"
       borderColor="#57bf9a"

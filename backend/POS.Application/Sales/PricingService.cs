@@ -58,6 +58,8 @@ ORDER BY InvoiceItems.ItemID ASC, InvoiceItems.InvoiceDate ASC, InvoiceItems.Inv
 """);
         List<InvoiceAveragePurchasePrice> averagePrices = [];
         CalculatePrices(relatedInvoiceItems, averagePrices, startDate);
+        if(averagePrices.Count == 0)
+            throw new POSException("there is no invoices for pricing");
 
         _repository.Add(new Pricing
         {
@@ -83,17 +85,18 @@ ORDER BY InvoiceItems.ItemID ASC, InvoiceItems.InvoiceDate ASC, InvoiceItems.Inv
         return _repository.Set.CountAsync();
     }
 
-    public async Task Remove(int id)
+    public async Task RemoveLastPricing()
     {
         using var t = await _transactionManager.BeginTransactionAsync();
+        
+        var lastPr = await _repository.Set.OrderByDescending(p => p.StartDate).AsNoTracking().FirstOrDefaultAsync();
+        if(lastPr is null)
+            throw new POSException("there is no pricings available");
 
-        if((await _repository.Set.AsNoTracking().FirstOrDefaultAsync(p => p.ID == id)) is null)
-            throw new POSException("invalid id");
-
-        _ = _repository.ExecuteRawSql<int>($"""
-DELETE FROM InvoiceAveragePurchasePrice WHERE PricingID = {id}
+        _ = await _repository.ExecuteRawSql<int>($"""
+DELETE FROM InvoiceAveragePurchasePrice WHERE PricingID = {lastPr.ID}
 """);
-        _repository.Remove(id);
+        _repository.Remove(lastPr.ID);
         await _repository.SaveChangesAsync();
         await t.CommitAsync();
     }
@@ -147,8 +150,8 @@ DELETE FROM InvoiceAveragePurchasePrice WHERE PricingID = {id}
 
     public async Task<DateTime> GetNewPricingStartDate()
     {
-        return (await _repository.Set.OrderBy(p => p.EndDate).FirstOrDefaultAsync())?.EndDate.Date.AddDays(1)
-            ?? (await _generalService.GetStoreInfo()).InitializationDate;
+        return (await _repository.Set.OrderByDescending(p => p.EndDate).FirstOrDefaultAsync())?.EndDate.Date.AddDays(1)
+            ?? (await _generalService.GetStoreInfo()).InitializationDate.Date;
     }
 
     public Task<bool> IsThereAnyPricingInDate(DateTime date)
