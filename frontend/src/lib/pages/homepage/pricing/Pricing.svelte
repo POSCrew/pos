@@ -6,6 +6,8 @@
     faSpinner,
     faRemove,
     faTrash,
+    faArrowLeft,
+    faArrowRight,
   } from "@fortawesome/free-solid-svg-icons";
   import {
     Button,
@@ -20,31 +22,55 @@
   import { sl } from "../../../di";
   import type { AxiosError } from "axios";
   import { dialogErrorHandler } from "../../../utils/svelte-utils";
-  import { tPricingService, type PricingService } from "../../../services/PricingService";
+  import {
+    tPricingService,
+    type PricingService,
+  } from "../../../services/PricingService";
   let pricingService: PricingService = sl.resolve(tPricingService);
 
   let newDialogOpen = $state(false);
   let pricing: Pricing = $state(new Pricing(new Date(), new Date()));
 
+  let pageSize = 10;
+  let currentPage: number = $state(1);
+  let totalPages: number = $state(1);
+
   let pricingList: Pricing[] = $state([]);
   let isLoading = $state(true);
   function refreshList() {
     isLoading = true;
-    pricingService.getPricings(0, 100).then((res) => {
+
+    pricingService.getCount().then((res) => {
+      totalPages = Math.ceil(res / pageSize);
+      if (currentPage > totalPages) currentPage = 0;
+    });
+
+    pricingService.getPricings(currentPage - 1, pageSize).then((res) => {
       pricingList = res;
       isLoading = false;
     });
   }
   refreshList();
 
+  function decreasePage() {
+    if (currentPage > 1) currentPage -= 1;
+    refreshList();
+  }
+
+  function increasePage() {
+    if (currentPage < totalPages) currentPage += 1;
+    refreshList();
+  }
+
   async function onNewPricing() {
     newDialogOpen = true;
-    pricing = new Pricing((await pricingService.getNewPricingStartDate()), new Date(new Date().toLocaleDateString()));
+    pricing = new Pricing(
+      await pricingService.getNewPricingStartDate(),
+      new Date(new Date().toLocaleDateString()),
+    );
   }
   function onSave() {
-    (
-      pricingService.create(pricing)
-    ).then((res) => {
+    pricingService.create(pricing).then((res) => {
       refreshList();
       newDialogOpen = false;
     });
@@ -57,7 +83,6 @@
     DialogUtils.confirmation(
       `Do you really want to delete last pricing?\n`,
     ).then((res) => {
-
       if (res === DialogResult.OK) {
         pricingService.removeLastPricing().then(() => {
           refreshList();
@@ -111,7 +136,9 @@
       {#each pricingList as ven}
         <!-- content here -->
         <tr class="bg-white border-b">
-          <td scope="row" class="px-6 py-4"> {new Date(ven.startDate).toLocaleString()} </td>
+          <td scope="row" class="px-6 py-4">
+            {new Date(ven.startDate).toLocaleString()}
+          </td>
           <td class="px-6 py-4"> {new Date(ven.endDate).toLocaleString()} </td>
         </tr>{/each}
     </tbody>
@@ -119,6 +146,32 @@
   {#if isLoading}
     <div class="flex justify-center items-center mt-4">
       <Fa icon={faSpinner} size="3x" spin />
+    </div>
+  {:else}
+    <div class="flex justify-center items-center mt-2">
+      <Button
+        hoverColor="#bfbfbfbb"
+        borderColor="#bfbfbf"
+        color="#bfbfbf"
+        borderThickness="1"
+        on:click={decreasePage}
+      >
+        <Fa icon={faArrowLeft} />
+      </Button>
+      <div class="m-1" />
+      <div>
+        page {currentPage} of {totalPages}
+      </div>
+      <div class="m-1" />
+      <Button
+        hoverColor="#bfbfbfbb"
+        borderColor="#bfbfbf"
+        color="#bfbfbf"
+        borderThickness="1"
+        on:click={increasePage}
+      >
+        <Fa icon={faArrowRight} />
+      </Button>
     </div>
   {/if}
 </div>
@@ -128,13 +181,10 @@
 
     <DatePicker
       label="Start Date :"
-      disabled = {true}
-      value={(new Date(pricing.startDate)).toISOString().substring(0, 10)}
+      disabled={true}
+      value={new Date(pricing.startDate).toISOString().substring(0, 10)}
     />
-    <DatePicker
-      label="End Date :"
-      bind:value={pricing.endDate}
-    />
+    <DatePicker label="End Date :" bind:value={pricing.endDate} />
     <div class="h-2"></div>
     <div class="flex">
       <Button on:click={onSave}>Do Pricing</Button>

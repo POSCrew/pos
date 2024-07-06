@@ -5,6 +5,8 @@
     faSpinner,
     faRefresh,
     faTrash,
+    faArrowLeft,
+    faArrowRight,
   } from "@fortawesome/free-solid-svg-icons";
   import {
     Button,
@@ -16,22 +18,45 @@
   import Fa from "svelte-fa";
   import { cloneCustomer, Customer } from "../../../data/Customer";
   import { sl } from "../../../di";
-  import { tCustomerService, type CustomerService } from "../../../services/CustomerService";
+  import {
+    tCustomerService,
+    type CustomerService,
+  } from "../../../services/CustomerService";
   let customerService: CustomerService = sl.resolve(tCustomerService);
 
   let newDialogOpen = $state(false);
   let customer: Customer = $state(new Customer("", "", "", "", ""));
 
+  let pageSize = 10;
+  let currentPage: number = $state(1);
+  let totalPages: number = $state(1);
+
   let customerList: Customer[] = $state([]);
   let isLoading = $state(true);
   function refreshList() {
     isLoading = true;
-    customerService.getCustomers(0, 100).then((res) => {
+
+    customerService.getCount().then((res) => {
+      totalPages = Math.ceil(res / pageSize);
+      if (currentPage > totalPages) currentPage = 0;
+    });
+
+    customerService.getCustomers(currentPage - 1, pageSize).then((res) => {
       customerList = res;
       isLoading = false;
     });
   }
   refreshList();
+
+  function decreasePage() {
+    if (currentPage > 1) currentPage -= 1;
+    refreshList();
+  }
+
+  function increasePage() {
+    if (currentPage < totalPages) currentPage += 1;
+    refreshList();
+  }
 
   function onNewCustomer() {
     newDialogOpen = true;
@@ -59,7 +84,7 @@
     console.log("delete item ", ven);
 
     DialogUtils.confirmation(
-      `Do you really want to delete this item : ${ven.firstName || ""} ${ven.lastName || ''}?\n`,
+      `Do you really want to delete this item : ${ven.firstName || ""} ${ven.lastName || ""}?\n`,
     ).then((res) => {
       console.log("result : ", res);
 
@@ -91,7 +116,7 @@
       borderThickness="1"
       on:click={refreshList}
     >
-      <Fa icon={faRefresh} /> 
+      <Fa icon={faRefresh} />
     </Button>
   </div>
 
@@ -143,6 +168,32 @@
   {#if isLoading}
     <div class="flex justify-center items-center mt-4">
       <Fa icon={faSpinner} size="3x" spin />
+    </div>
+  {:else}
+    <div class="flex justify-center items-center mt-2">
+      <Button
+        hoverColor="#bfbfbfbb"
+        borderColor="#bfbfbf"
+        color="#bfbfbf"
+        borderThickness="1"
+        on:click={decreasePage}
+      >
+        <Fa icon={faArrowLeft} />
+      </Button>
+      <div class="m-1" />
+      <div>
+        page {currentPage} of {totalPages}
+      </div>
+      <div class="m-1" />
+      <Button
+        hoverColor="#bfbfbfbb"
+        borderColor="#bfbfbf"
+        color="#bfbfbf"
+        borderThickness="1"
+        on:click={increasePage}
+      >
+        <Fa icon={faArrowRight} />
+      </Button>
     </div>
   {/if}
 </div>

@@ -1,5 +1,7 @@
 <script lang="ts">
   import {
+  faArrowLeft,
+    faArrowRight,
     faEdit,
     faPlus,
     faRefresh,
@@ -27,16 +29,36 @@
   let newDialogOpen = $state(false);
   let vendor: Vendor = $state(new Vendor("", "", "", "", ""));
 
+  let pageSize = 10;
+  let currentPage: number = $state(1);
+  let totalPages: number = $state(1);
+
   let vendorList: Vendor[] = $state([]);
   let isLoading = $state(true);
   function refreshList() {
     isLoading = true;
-    vendorService.getVendors(0, 100).then((res) => {
+
+    vendorService.getCount().then((res) => {
+      totalPages = Math.ceil(res / pageSize);
+      if (currentPage > totalPages) currentPage = 0;
+    });
+
+    vendorService.getVendors(currentPage - 1, pageSize).then((res) => {
       vendorList = res;
       isLoading = false;
     });
   }
   refreshList();
+
+  function decreasePage() {
+    if (currentPage > 1) currentPage -= 1;
+    refreshList();
+  }
+
+  function increasePage() {
+    if (currentPage < totalPages) currentPage += 1;
+    refreshList();
+  }
 
   function onNewVendor() {
     newDialogOpen = true;
@@ -148,6 +170,32 @@
   {#if isLoading}
     <div class="flex justify-center items-center mt-4">
       <Fa icon={faSpinner} size="3x" spin />
+    </div>
+  {:else}
+    <div class="flex justify-center items-center mt-2">
+      <Button
+        hoverColor="#bfbfbfbb"
+        borderColor="#bfbfbf"
+        color="#bfbfbf"
+        borderThickness="1"
+        on:click={decreasePage}
+      >
+        <Fa icon={faArrowLeft} />
+      </Button>
+      <div class="m-1" />
+      <div>
+        page {currentPage} of {totalPages}
+      </div>
+      <div class="m-1" />
+      <Button
+        hoverColor="#bfbfbfbb"
+        borderColor="#bfbfbf"
+        color="#bfbfbf"
+        borderThickness="1"
+        on:click={increasePage}
+      >
+        <Fa icon={faArrowRight} />
+      </Button>
     </div>
   {/if}
 </div>
