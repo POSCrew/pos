@@ -239,7 +239,7 @@ public sealed class SaleInvoiceService : ISaleInvoiceService
     public Task<List<SaleInvoice>> GetAll(int? page, int? pageSize)
     {
         if (page is null || pageSize is null || page < 0 || pageSize < 1)
-            return _repository.Set.AsNoTracking().ToListAsync();
+            return _repository.Set.Include(i => i.Customer).AsNoTracking().ToListAsync();
 
         return _repository.Set.Skip(page.Value * pageSize.Value).Take(pageSize.Value).Include(i => i.Customer).AsNoTracking().ToListAsync();
     }
