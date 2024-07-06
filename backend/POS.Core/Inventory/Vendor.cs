@@ -8,6 +8,6 @@ public sealed class Vendor : Party
     {
         ID = -1,
         Code = "0",
-        FirstName = "تامین کننده پیش فرض"
+        FirstName = "Default Vendor"
     };
 }
