@@ -11,7 +11,7 @@
   import type { Item } from "../../../data/Item";
   import { untrack } from "svelte";
   import { flip } from "svelte/animate";
-  import { Button, DatePicker, NumberField } from "ui-commons";
+  import { Button, DatePicker, DialogUtils, NumberField } from "ui-commons";
   import { isoDate } from "../../../utils/dateUtils";
   import { sl } from "../../../di";
   import {
@@ -32,7 +32,7 @@
         });
         if (!currentItem) {
           invoiceItems.push({
-            rowNumber: invoiceItems.length+1,
+            rowNumber: invoiceItems.length + 1,
             itemId: item.id,
             itemTitle: item.title,
             itemSerial: item.serial,
@@ -48,17 +48,25 @@
 
   function deleteItem(ind) {
     invoiceItems.splice(ind, 1);
+    for (let i = ind; i < invoiceItems.length; i++) {
+      invoiceItems[i].rowNumber--;
+    }
   }
 
   function moveUp(i) {
     if (i === 0) return;
+    invoiceItems[i].rowNumber--;
+    invoiceItems[i-1].rowNumber++;
     let temp;
     temp = invoiceItems[i - 1];
     invoiceItems[i - 1] = invoiceItems[i];
     invoiceItems[i] = temp;
+    
   }
   function moveDown(i) {
     if (i === invoiceItems.length - 1) return;
+    invoiceItems[i].rowNumber++;
+    invoiceItems[i+1].rowNumber--
     let temp;
     temp = invoiceItems[i + 1];
     invoiceItems[i + 1] = invoiceItems[i];
@@ -68,6 +76,9 @@
   let invoiceNumber: number = $state();
 
   function save() {
+    if (!customer) {
+      DialogUtils.error("", "Customer should be selected!");
+    }
     invoiceService
       .create({
         number: invoiceNumber,
