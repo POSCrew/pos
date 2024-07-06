@@ -19,26 +19,37 @@
   let vendorService: VendorService = sl.resolve(tVendorService);
   let customerService: CustomerService = sl.resolve(tCustomerService);
   let itemService: ItemService = sl.resolve(tItemService);
-  let items: Item[] = [];
-  let vendors: Vendor[];
-  let customers: Customer[];
+  let items: Item[] = $state([]);
+  let customers: Customer[] = $state([]);
   itemService.getItems().then((response) => {
     items = response;
-  });
-  vendorService.getVendors().then((res) => {
-    vendors = res;
   });
   customerService.getCustomers().then((res) => {
     customers = res;
   });
+
+  let customer: Customer = $state(null);
+  let lastItem: Item = $state(null);
 </script>
 
 <main class="flex min-h-full">
   <!-- content here -->
   <div class="flex-grow-0 w-96">
-    <NavigationMenu {items} />
+    <NavigationMenu
+      {items}
+      {customers}
+      on:onCustomerSelected={(c) => {
+        customer = c.detail;
+      }}
+      on:onItemAdd={(e) => {
+        lastItem = e.detail;
+        setTimeout(() => {
+          lastItem = null;
+        });
+      }}
+    />
   </div>
   <div class="grow w-0">
-    <MainArea {items} />
+    <MainArea {customer} item={lastItem} />
   </div>
 </main>
