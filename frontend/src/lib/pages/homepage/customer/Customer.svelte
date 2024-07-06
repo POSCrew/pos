@@ -46,6 +46,9 @@
       newDialogOpen = false;
     });
   }
+  function onCancel() {
+    newDialogOpen = false;
+  }
 
   function editItem(ven: Customer) {
     customer = cloneCustomer(ven);
@@ -150,36 +153,39 @@
 
     <TextField
       type="text"
-      label="First Name"
-      placeholder="First Name :"
+      label="First Name :"
+      placeholder="First Name"
       bind:value={customer.firstName}
     />
     <TextField
       type="text"
-      label="Last Name"
-      placeholder="Last Name :"
+      label="Last Name :"
+      placeholder="Last Name"
       bind:value={customer.lastName}
     />
     <TextField
       type="text"
-      label="Enter Code"
-      placeholder="Code : "
+      label="Code :"
+      placeholder="Code"
       bind:value={customer.code}
     />
     <TextField
-      type="text"
-      label="Enter phone number"
-      placeholder="Phone number : "
+      type="tel"
+      label="phone number :"
+      placeholder="Phone number"
       bind:value={customer.phoneNumber}
     />
     <TextField
       type="text"
-      label="Address"
-      placeholder="Address : "
+      label="Address :"
+      placeholder="Address"
       bind:value={customer.address}
     />
     <div class="h-2"></div>
-    <Button on:click={onSave}>Save</Button>
+    <div class="flex">
+      <Button on:click={onSave}>Save</Button>
+      <Button on:click={onCancel}>Cancel</Button>
+    </div>
   </div>
 </Dialog>
 

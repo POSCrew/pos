@@ -49,6 +49,9 @@
       newDialogOpen = false;
     });
   }
+  function onCancel() {
+    newDialogOpen = false;
+  }
 
   function editItem(ven: Vendor) {
     vendor = cloneVendor(ven);
@@ -153,36 +156,39 @@
 
     <TextField
       type="text"
-      label="First Name"
-      placeholder="First Name :"
+      label="First Name :"
+      placeholder="First Name"
       bind:value={vendor.firstName}
     />
     <TextField
       type="text"
-      label="Last Name"
-      placeholder="Last Name :"
+      label="Last Name :"
+      placeholder="Last Name"
       bind:value={vendor.lastName}
     />
     <TextField
       type="text"
-      label="Enter Code"
-      placeholder="Code : "
+      label="Code :"
+      placeholder="Code"
       bind:value={vendor.code}
     />
     <TextField
-      type="text"
-      label="Enter phone number"
-      placeholder="Phone number : "
+      type="tel"
+      label="Phone number :"
+      placeholder="Phone number"
       bind:value={vendor.phoneNumber}
     />
     <TextField
       type="text"
-      label="Address"
-      placeholder="Address : "
+      label="Address :"
+      placeholder="Address"
       bind:value={vendor.address}
     />
     <div class="h-2"></div>
-    <Button on:click={onSave}>Save</Button>
+    <div class="flex">
+      <Button on:click={onSave}>Save</Button>
+      <Button on:click={onCancel}>Cancel</Button>
+    </div>
   </div>
 </Dialog>
 
