@@ -20,6 +20,8 @@
     tVendorService,
     VendorService,
   } from "../../../services/vendorService";
+  import type { AxiosError } from "axios";
+  import { dialogErrorHandler } from "../../../utils/svelte-utils";
   let vendorService: VendorService = sl.resolve(tVendorService);
 
   let newDialogOpen = $state(false);
@@ -41,13 +43,12 @@
     vendor = new Vendor("", "", "", "", "");
   }
   function onSave() {
-    (!vendor.id
-      ? vendorService.create(vendor)
-      : vendorService.update(vendor)
-    ).then((res) => {
-      refreshList();
-      newDialogOpen = false;
-    });
+    (!vendor.id ? vendorService.create(vendor) : vendorService.update(vendor))
+      .then((res) => {
+        refreshList();
+        newDialogOpen = false;
+      })
+      .catch(dialogErrorHandler);
   }
   function onCancel() {
     newDialogOpen = false;
@@ -62,7 +63,7 @@
     console.log("delete item ", ven);
 
     DialogUtils.confirmation(
-      `Do you really want to delete this item : ${ven.firstName || ""} ${ven.lastName || ''}?\n`,
+      `Do you really want to delete this item : ${ven.firstName || ""} ${ven.lastName || ""}?\n`,
     ).then((res) => {
       console.log("result : ", res);
 
