@@ -19,5 +19,8 @@ String.prototype.hashCode = function () {
   }
   return hash;
 };
-const app = mount(App, { target: document.getElementById("app") });
+let app;
+try {
+  app = mount(App, { target: document.getElementById("app") });
+} catch (e) {}
 export default app;
