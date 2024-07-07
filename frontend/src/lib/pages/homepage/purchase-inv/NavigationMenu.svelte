@@ -40,8 +40,10 @@
       case 13:
         if (filteredItems[0]) {
           dispatch("onItemAdd", filteredItems[0]);
+          search = "";
         } else if (filteredCutromers[0]) {
           dispatch("onVendorSelected", filteredCutromers[0]);
+          search = "";
         }
         break;
     }
