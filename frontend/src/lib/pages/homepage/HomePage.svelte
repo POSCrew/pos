@@ -18,6 +18,7 @@
   import SalesReview from "./salesReview/SalesReview.svelte";
   import Pricing from "./pricing/Pricing.svelte";
   import SaleInvoiceList from "./sale-invoice-list/SaleInvoiceList.svelte";
+  import PurchaseInvoice from "./purchase-inv/PurchaseInvoice.svelte";
   
   let authService: AuthService;
   let user: User = null;
@@ -74,7 +75,7 @@ function tabIndexChange(ind){
   
    
    {:else if tabGroup.ind===1}
-   {@render navBtn("Purchase invoice", faPlus)}
+   {@render navBtn("Purchase invoice", faPlus, ()=>{navigate('purchase-inv')})}
    <Space width="4px"/>
    {@render navBtn("Vendor", faPlus, ()=>{navigate('vendor')})}
     <Space width="4px"/>
@@ -91,6 +92,9 @@ function tabIndexChange(ind){
 
   <Route path="sale-inv">
     <SaleInvoice/>
+  </Route>
+  <Route path="purchase-inv">
+    <PurchaseInvoice/>
   </Route>
   <Route path="sale-inv-list">
     <SaleInvoiceList/>
