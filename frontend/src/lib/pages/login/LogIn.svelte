@@ -26,7 +26,7 @@
     let loginReq = { password, username };
     console.log();
     service.login(loginReq).then((res) => {
-      navigate("/invoices");
+      navigate("/sale-inv");
     });
   }
   function createAdmin() {
