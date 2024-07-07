@@ -98,6 +98,11 @@
       })
       .then((res) => {
         console.log(res);
+        invoiceDate = isoDate(new Date().toISOString())
+        invoiceNumber = null;
+        invoiceItems = []
+        vendor = null;
+        description = ""
       });
   }
 </script>

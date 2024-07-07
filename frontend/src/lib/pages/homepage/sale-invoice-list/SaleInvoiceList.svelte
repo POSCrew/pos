@@ -34,6 +34,7 @@
   } from "../../../services/SaleInvoiceService";
   import { navigate } from "svelte-navigator";
   import { flip } from "svelte/animate";
+  import { isoDate } from "../../../utils/dateUtils";
   let saleInvoiceService: SaleInvoiceService = sl.resolve(tSaleInvoiceService);
 
   let newDialogOpen = $state(false);
@@ -224,7 +225,7 @@
           </h3>
           <div class="flex gap-2">
             <DatePicker
-              bind:value={viewedItem.date}
+              value={isoDate(viewedItem.date)}
               label="Invoive Date : "
               disabled
             />

@@ -32,6 +32,7 @@
     type PurchaseInvoiceService,
   } from "../../../services/PurchaseInvoiceService";
   import { navigate } from "svelte-navigator";
+  import { isoDate } from "../../../utils/dateUtils";
   let purchaseInvoiceService: PurchaseInvoiceService = sl.resolve(
     tPurchaseInvoiceService,
   );
@@ -225,7 +226,7 @@
           </h3>
           <div class="flex gap-2">
             <DatePicker
-              bind:value={viewedItem.date}
+              value={isoDate(viewedItem.date)}
               label="Invoive Date : "
               disabled
             />
