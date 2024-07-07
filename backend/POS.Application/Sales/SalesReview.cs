@@ -73,7 +73,7 @@ WITH InvoiceItems AS (
 SELECT *
 FROM InvoiceItems
 WHERE (@StartDate IS NULL OR InvoiceDay >= @StartDate) AND (@EndDate IS NULL OR InvoiceDay <= @EndDate)
-ORDER BY InvoiceItems.ItemID ASC, InvoiceItems.InvoiceDay ASC, InvoiceItems.InvoiceType ASC, InvoiceItems.InvoiceNumber ASC
+ORDER BY InvoiceItems.InvoiceDay ASC, InvoiceItems.InvoiceType ASC, InvoiceItems.ItemID ASC, InvoiceItems.InvoiceNumber ASC
 """);
     }
 }
