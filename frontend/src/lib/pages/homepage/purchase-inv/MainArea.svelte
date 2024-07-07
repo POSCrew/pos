@@ -11,7 +11,13 @@
   import type { Item } from "../../../data/Item";
   import { untrack } from "svelte";
   import { flip } from "svelte/animate";
-  import { Button, DatePicker, DialogUtils, NumberField, TextField } from "ui-commons";
+  import {
+    Button,
+    DatePicker,
+    DialogUtils,
+    NumberField,
+    TextField,
+  } from "ui-commons";
   import { isoDate } from "../../../utils/dateUtils";
   import { sl } from "../../../di";
   import {
@@ -20,7 +26,9 @@
   } from "../../../services/PurchaseInvoiceService";
   import { navigate } from "svelte-navigator";
 
-  const invoiceService: PurchaseInvoiceService = sl.resolve(tPurchaseInvoiceService);
+  const invoiceService: PurchaseInvoiceService = sl.resolve(
+    tPurchaseInvoiceService,
+  );
 
   let { vendor, item } = $props<{ vendor: Vendor; item: Item }>();
   let invoiceItems = $state([]);
@@ -38,7 +46,7 @@
             itemTitle: item.title,
             itemSerial: item.serial,
             quantity: 1,
-            price: 0,
+            price: item.salePrice,
           });
         } else {
           currentItem.quantity++;
@@ -57,17 +65,16 @@
   function moveUp(i) {
     if (i === 0) return;
     invoiceItems[i].rowNumber--;
-    invoiceItems[i-1].rowNumber++;
+    invoiceItems[i - 1].rowNumber++;
     let temp;
     temp = invoiceItems[i - 1];
     invoiceItems[i - 1] = invoiceItems[i];
     invoiceItems[i] = temp;
-    
   }
   function moveDown(i) {
     if (i === invoiceItems.length - 1) return;
     invoiceItems[i].rowNumber++;
-    invoiceItems[i+1].rowNumber--
+    invoiceItems[i + 1].rowNumber--;
     let temp;
     temp = invoiceItems[i + 1];
     invoiceItems[i + 1] = invoiceItems[i];
@@ -75,7 +82,7 @@
   }
   let invoiceDate = $state(isoDate(new Date().toISOString()));
   let invoiceNumber: number = $state();
-  let description = $state('')
+  let description = $state("");
 
   function save() {
     if (!vendor) {
@@ -111,7 +118,7 @@
         <DatePicker bind:value={invoiceDate} label="Invoive Date : " />
         <NumberField bind:value={invoiceNumber} label="Invoice number : " />
       </div>
-      <TextField label="Description" bind:value={description}/>
+      <TextField label="Description" bind:value={description} />
     </div>
 
     <div class="h-0 grow overflow-y-auto">
@@ -122,8 +129,8 @@
             <th scope="col" class="px-6 py-3"> Item serial </th>
             <th scope="col" class="px-6 py-3"> Item title</th>
             <th scope="col" class="px-6 py-3"> Quantity </th>
-            <th scope="col" class="px-6 py-3"> Price </th>
             <th scope="col" class="px-6 py-3"> Fee </th>
+            <th scope="col" class="px-6 py-3"> Price </th>
             <th scope="col" class="px-6 py-3"> Delete </th>
           </tr>
         </thead>
@@ -171,11 +178,25 @@
   </div>
 
   <div class="flex-grow-0 border-t-2 p-2 px-6 flex items-center">
-    <Button color="#eee" on:click={()=>{navigate('../purchase-inv-list')}}>
+    <Button
+      color="#eee"
+      on:click={() => {
+        navigate("../purchase-inv-list");
+      }}
+    >
       <Fa icon={faList} />
       List
     </Button>
     <div class="mr-auto"></div>
+    <p class="mr-6">
+      Total price:
+      {invoiceItems?.length &&
+        invoiceItems
+          .map((e) => e.price * e.quantity)
+          .reduce((sum, e) => {
+            return sum + e;
+          })}
+    </p>
     <Button color="#a8fe95" on:click={save}>
       <Fa icon={faSave} /> Save
     </Button>
