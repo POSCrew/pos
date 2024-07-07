@@ -14,6 +14,7 @@ public static class UserEndpoints
         var users = routes.MapGroup("users")
             .AddEndpointFilter<RequiresInitializationFilter>();
         users.MapPost("login", Login);
+        users.MapPost("logout", Logout);
         users.MapPost("registerAdmin", RegisterAdmin);
         users.MapPost("changePassword", ChangePassword).RequireAuthorization();
         users.MapGet("me", GetMe).RequireAuthorization();
@@ -127,6 +128,13 @@ public static class UserEndpoints
         await signInManager.SignInAsync(user, true);
 
         return Results.Ok();
+    }
+
+    private static Task Logout(
+        [FromServices] SignInManager<POSUser> signInManager
+    )
+    {
+        return signInManager.SignOutAsync();
     }
 
     private static async Task<IResult> RegisterAdmin(

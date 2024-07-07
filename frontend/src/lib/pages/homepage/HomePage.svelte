@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Space } from "ui-commons";
+  import { Button, DialogResult, DialogUtils, Space } from "ui-commons";
   import { faHouse, faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
   import NavigationMenu from "./sale-inv/NavigationMenu.svelte";
@@ -22,7 +22,7 @@
   import PurchaseInvoiceList from "./purchase-invoice-list/PurchaseInvoiceList.svelte";
   
   let authService: AuthService;
-  let user: User = null;
+  let user: User = $state(null);
 
   let items = ([]);
   let invoice = ({});
@@ -60,7 +60,7 @@ function tabIndexChange(ind){
     Inventory
   </div>
 </div>
-  <div class="navbar bg-slate-200 h-10 flex items-center px-4 md:px-12 lg:px-24 py-6">
+  <div class="navbar bg-slate-200 h-10 flex items-center px-2 md:px-2 lg:px-2 py-2">
    {#if tabGroup.ind===0}
    
   
@@ -69,11 +69,15 @@ function tabIndexChange(ind){
     
     {@render navBtn("Customer", faPlus, ()=> {navigate('customer')})}
     <Space width="4px"/>
+    
+    {#if user?.username == "admin"}
     {@render navBtn("Pricing", faPlus, () => {navigate('pricing')})}
     <Space width="4px"/>
+    
     {@render navBtn("Sales Review", faPlus, ()=>{navigate('sale-review')})}
     <Space width="4px"/>
-  
+    
+    {/if}
    
    {:else if tabGroup.ind===1}
    {@render navBtn("Purchase invoice", faPlus, ()=>{navigate('purchase-inv')})}
@@ -82,9 +86,32 @@ function tabIndexChange(ind){
     <Space width="4px"/>
     {@render navBtn("Item", faPlus, ()=>{navigate('item')})}
     <Space width="4px"/>
+    
+    {#if user?.username == "admin"}
     {@render navBtn("Inventory Review", faPlus, ()=>{navigate('inv-review')})}
     <Space width="4px"/>
+    {/if}
    {/if}
+
+   
+   <div class="w-fit ml-auto">
+     <Button hoverColor="#fff3" borderColor='#555' borderThickness=1  on:click={()=>{
+        DialogUtils.confirmation(
+          `Do you want to log out ?\n`,
+        ).then((res) => {
+          console.log("result : ", res);
+
+          if (res === DialogResult.OK) {
+            authService.logout().then(() => {
+              navigate('login');
+            });
+        }
+      });
+     }}>
+       <Fa icon={faUser} /> {user?.username}
+      </Button>
+    </div>
+   
   </div>
 </div>
 

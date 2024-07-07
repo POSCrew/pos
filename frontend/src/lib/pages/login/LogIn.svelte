@@ -18,8 +18,8 @@
   let isStoreInitialized = $state(false);
   onMount(async () => {
     isStoreInitialized = await storeService.isStoreInitialized();
-    if(isStoreInitialized){
-      storeTitle = (await storeService.getStore()).title
+    if (isStoreInitialized) {
+      storeTitle = (await storeService.getStore()).title;
     }
   });
   function login() {
@@ -48,11 +48,10 @@
 <div class="border m-auto my-12 lg:w-[50%] w-[75%] py-14 px-14 lg:px-36">
   {#if isStoreInitialized}
     <div>
-      <h2 class="text-gray-500">Store title: <span class="text-gray-800">{storeTitle}</span> </h2>
+      <h2 class="text-gray-500">
+        Store title: <span class="text-gray-800">{storeTitle}</span>
+      </h2>
       <div class="h-1"></div>
-      <Button on:click={createAdmin} borderColor="gray" borderThickness="1"
-        >Create Admin User</Button
-      >
 
       <TextField
         type="text"
@@ -68,9 +67,15 @@
         bind:value={password}
       />
       <div class="h-2"></div>
-      <Button on:click={login} borderColor="gray" borderThickness="1"
-        >Login</Button
-      >
+      <div class="flex">
+        <Button on:click={login} borderColor="gray" borderThickness="1"
+          >Login</Button
+        >
+        <div class="m-1"></div>
+        <Button on:click={createAdmin} borderColor="gray" borderThickness="1"
+          >Create Admin User</Button
+        >
+      </div>
     </div>
   {:else}
     <p class="text-center">You have to initialize store in order to use it.</p>
