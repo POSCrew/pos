@@ -25,11 +25,13 @@
   import type { AxiosError } from "axios";
   import { dialogErrorHandler } from "../../../utils/svelte-utils";
   import {
-    tSaleInvoiceService,
-    type SaleInvoiceService,
-  } from "../../../services/SaleInvoiceService";
+    tPurchaseInvoiceService,
+    type PurchaseInvoiceService,
+  } from "../../../services/PurchaseInvoiceService";
   import { navigate } from "svelte-navigator";
-  let saleInvoiceService: SaleInvoiceService = sl.resolve(tSaleInvoiceService);
+  let purchaseInvoiceService: PurchaseInvoiceService = sl.resolve(
+    tPurchaseInvoiceService,
+  );
 
   let newDialogOpen = $state(false);
 
@@ -37,18 +39,18 @@
   let currentPage: number = $state(1);
   let totalPages: number = $state(1);
 
-  let saleInvoiceList: any[] = $state([]);
+  let purchaseInvoiceList: any[] = $state([]);
   let isLoading = $state(true);
   function refreshList() {
     isLoading = true;
 
-    saleInvoiceService.getCount().then((res) => {
+    purchaseInvoiceService.getCount().then((res) => {
       totalPages = Math.ceil(res / pageSize);
       if (currentPage > totalPages) currentPage = 0;
     });
 
-    saleInvoiceService.getItems(currentPage - 1, pageSize).then((res) => {
-      saleInvoiceList = res;
+    purchaseInvoiceService.getItems(currentPage - 1, pageSize).then((res) => {
+      purchaseInvoiceList = res;
       isLoading = false;
     });
   }
@@ -64,20 +66,20 @@
     refreshList();
   }
 
-  function onNewSaleInvoice() {
-    navigate("../sale-inv");
+  function onNewPurchaseInvoice() {
+    navigate("../purchase-inv");
   }
 
   function onCancel() {}
 
-  function deleteItem(saleInvoice) {
+  function deleteItem(purchaseInvoice) {
     DialogUtils.confirmation(
-      `Do you really want to delete this invoice with number : ${saleInvoice.number || ""}?\n`,
+      `Do you really want to delete this invoice with number : ${purchaseInvoice.number || ""}?\n`,
     ).then((res) => {
       console.log("result : ", res);
 
       if (res === DialogResult.OK) {
-        saleInvoiceService.remove(saleInvoice.id).then(() => {
+        purchaseInvoiceService.remove(purchaseInvoice.id).then(() => {
           refreshList();
         });
       }
@@ -92,7 +94,7 @@
       borderColor="#57bf9a"
       color="#6ff1c4"
       borderThickness="1"
-      on:click={onNewSaleInvoice}
+      on:click={onNewPurchaseInvoice}
     >
       <Fa icon={faPlus} /> New
     </Button>
@@ -121,7 +123,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each saleInvoiceList as si}
+      {#each purchaseInvoiceList as si}
         <!-- content here -->
 
         <tr class="bg-white border-b">

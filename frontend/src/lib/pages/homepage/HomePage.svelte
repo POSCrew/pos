@@ -19,6 +19,7 @@
   import Pricing from "./pricing/Pricing.svelte";
   import SaleInvoiceList from "./sale-invoice-list/SaleInvoiceList.svelte";
   import PurchaseInvoice from "./purchase-inv/PurchaseInvoice.svelte";
+  import PurchaseInvoiceList from "./purchase-invoice-list/PurchaseInvoiceList.svelte";
   
   let authService: AuthService;
   let user: User = null;
@@ -98,6 +99,9 @@ function tabIndexChange(ind){
   </Route>
   <Route path="sale-inv-list">
     <SaleInvoiceList/>
+  </Route>
+  <Route path="purchase-inv-list">
+    <PurchaseInvoiceList/>
   </Route>
   <Route path="customer">
     <Customer/>
