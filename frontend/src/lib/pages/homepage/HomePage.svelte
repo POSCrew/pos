@@ -152,9 +152,12 @@ function tabIndexChange(ind){
 </div>
 
 {#snippet navBtn(text, icon, onclick=()=>{})}
-<Button hoverColor="#fff3" borderColor='#555' borderThickness=1 on:click={onclick}>
-  <Fa icon={icon} /> {text}
-</Button>
+<div class="flex justify-center items-center border-[1px] border-gray-600 gap-1 p-1 rounded my-2 cursor-pointer hover:bg-emerald-200 hover:shadow-md shadow-slate-800 transition-all" 
+on:click={onclick}>
+  {#if icon}
+     <Fa icon={icon} />
+  {/if} {text}
+</div>
 {/snippet}
 
 
