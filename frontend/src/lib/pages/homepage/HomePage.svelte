@@ -68,11 +68,15 @@ function tabIndexChange(ind){
     
     {@render navBtn("Customer", faPlus, ()=> {navigate('customer')})}
     <Space width="4px"/>
+    
+    {#if user?.username == "admin"}
     {@render navBtn("Pricing", faPlus, () => {navigate('pricing')})}
     <Space width="4px"/>
+    
     {@render navBtn("Sales Review", faPlus, ()=>{navigate('sale-review')})}
     <Space width="4px"/>
-  
+    
+    {/if}
    
    {:else if tabGroup.ind===1}
    {@render navBtn("Purchase invoice", faPlus, ()=>{navigate('purchase-inv')})}
@@ -81,8 +85,11 @@ function tabIndexChange(ind){
     <Space width="4px"/>
     {@render navBtn("Item", faPlus, ()=>{navigate('item')})}
     <Space width="4px"/>
+    
+    {#if user?.username == "admin"}
     {@render navBtn("Inventory Review", faPlus, ()=>{navigate('inv-review')})}
     <Space width="4px"/>
+    {/if}
    {/if}
 
    
