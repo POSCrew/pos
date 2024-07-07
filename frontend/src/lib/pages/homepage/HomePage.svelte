@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Space } from "ui-commons";
+  import { Button, DialogResult, DialogUtils, Space } from "ui-commons";
   import { faHouse, faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
   import NavigationMenu from "./sale-inv/NavigationMenu.svelte";
@@ -87,7 +87,19 @@ function tabIndexChange(ind){
 
    
    <div class="w-fit ml-auto">
-     <Button hoverColor="#fff3" borderColor='#555' borderThickness=1  on:click={()=>{}}>
+     <Button hoverColor="#fff3" borderColor='#555' borderThickness=1  on:click={()=>{
+        DialogUtils.confirmation(
+          `Do you want to log out ?\n`,
+        ).then((res) => {
+          console.log("result : ", res);
+
+          if (res === DialogResult.OK) {
+            authService.logout().then(() => {
+              navigate('login');
+            });
+        }
+      });
+     }}>
        <Fa icon={faUser} /> {user?.username}
       </Button>
     </div>

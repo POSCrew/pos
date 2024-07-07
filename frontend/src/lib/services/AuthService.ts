@@ -18,6 +18,11 @@ export class AuthService {
     return res.data;
   }
 
+  async logout() {
+    let url = this.http.url("users/logout");
+    const res = await this.http.post(url);
+  }
+
   async currentUser(): Promise<User> {
     if (!this.user) {
       const me: User = (
