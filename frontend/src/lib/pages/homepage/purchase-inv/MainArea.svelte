@@ -46,7 +46,7 @@
             itemTitle: item.title,
             itemSerial: item.serial,
             quantity: 1,
-            price: item.salePrice,
+            price: 0,
           });
         } else {
           currentItem.quantity++;
