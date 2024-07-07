@@ -21,7 +21,7 @@
   import PurchaseInvoice from "./purchase-inv/PurchaseInvoice.svelte";
   
   let authService: AuthService;
-  let user: User = null;
+  let user: User = $state(null);
 
   let items = ([]);
   let invoice = ({});
@@ -59,7 +59,7 @@ function tabIndexChange(ind){
     Inventory
   </div>
 </div>
-  <div class="navbar bg-slate-200 h-10 flex items-center px-4 md:px-12 lg:px-24 py-6">
+  <div class="navbar bg-slate-200 h-10 flex items-center px-2 md:px-2 lg:px-2 py-2">
    {#if tabGroup.ind===0}
    
   
@@ -84,6 +84,14 @@ function tabIndexChange(ind){
     {@render navBtn("Inventory Review", faPlus, ()=>{navigate('inv-review')})}
     <Space width="4px"/>
    {/if}
+
+   
+   <div class="w-fit ml-auto">
+     <Button hoverColor="#fff3" borderColor='#555' borderThickness=1  on:click={()=>{}}>
+       <Fa icon={faUser} /> {user?.username}
+      </Button>
+    </div>
+   
   </div>
 </div>
 
