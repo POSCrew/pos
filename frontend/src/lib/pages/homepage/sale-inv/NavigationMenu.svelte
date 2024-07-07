@@ -50,33 +50,35 @@
 </script>
 
 <div class="flex flex-col nav-menu bg-gray-100 h-full p-3">
-  <TextField
-    type="text"
-    bind:value={search}
-    placeholder="Enter something"
-    on:keydown={onSearchKeyPress}
-  />
+  <div class="overflow-y-auto" style="max-height:80vh;">
+    <TextField
+      type="text"
+      bind:value={search}
+      placeholder="Enter something"
+      on:keydown={onSearchKeyPress}
+    />
 
-  {#each filteredItems as item, i}
-    <div
-      class="border-[1px] rounded-sm m-1 bg-cyan-100 pl-2"
-      on:click={() => {
-        dispatch("onItemAdd", filteredItems[i]);
-      }}
-    >
-      <span class="m-0">{item.serial}</span>
-      <p class="text-gray-600 mt-[-8px] italic">{item.title}</p>
-    </div>
-  {/each}
-  {#each filteredCutromers as customer, i}
-    <div
-      class="border-[1px] rounded-sm m-1 bg-violet-100 pl-2"
-      on:click={() => {
-        dispatch("onCustomerSelected", filteredCutromers[i]);
-      }}
-    >
-      <span class="m-0">{customer.firstName} {customer.lastName}</span>
-      <p class="text-gray-600 mt-[-4px]">{customer.code}</p>
-    </div>
-  {/each}
+    {#each filteredItems as item, i}
+      <div
+        class="border-[1px] rounded-sm m-1 bg-cyan-100 pl-2"
+        on:click={() => {
+          dispatch("onItemAdd", filteredItems[i]);
+        }}
+      >
+        <span class="m-0">{item.serial}</span>
+        <p class="text-gray-600 mt-[-8px] italic">{item.title}</p>
+      </div>
+    {/each}
+    {#each filteredCutromers as customer, i}
+      <div
+        class="border-[1px] rounded-sm m-1 bg-violet-100 pl-2"
+        on:click={() => {
+          dispatch("onCustomerSelected", filteredCutromers[i]);
+        }}
+      >
+        <span class="m-0">{customer.firstName} {customer.lastName}</span>
+        <p class="text-gray-600 mt-[-4px]">{customer.code}</p>
+      </div>
+    {/each}
+  </div>
 </div>
