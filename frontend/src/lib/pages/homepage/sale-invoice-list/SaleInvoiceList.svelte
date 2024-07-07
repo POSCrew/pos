@@ -262,12 +262,7 @@
                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex justify-center"
                   >
                     <div class="mr-1">
-                      <!-- <div on:click={() => moveUp(i)}>
-                      <Fa icon={faChevronUp} />
-                    </div>
-                    <div on:click={() => moveDown(i)}>
-                      <Fa icon={faChevronDown} />
-                    </div> -->
+                      {invItem.rowNumber}
                     </div>
                   </th>
                   <td class="px-6 py-4"> {invItem.item.serial} </td>
