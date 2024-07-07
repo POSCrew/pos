@@ -3,6 +3,7 @@
     faArrowLeft,
     faArrowRight,
     faEdit,
+    faEye,
     faPlus,
     faRefresh,
     faSpinner,
@@ -10,9 +11,11 @@
   } from "@fortawesome/free-solid-svg-icons";
   import {
     Button,
+    DatePicker,
     Dialog,
     DialogResult,
     DialogUtils,
+    NumberField,
     TextField,
   } from "ui-commons";
   import Fa from "svelte-fa";
@@ -85,6 +88,13 @@
       }
     });
   }
+
+  let isViewDialogOpen = $state(false);
+  let viewedItem = $state(null);
+  async function viewItem(id) {
+    viewedItem = await purchaseInvoiceService.getItem(id);
+    isViewDialogOpen = true;
+  }
 </script>
 
 <div class="relative overflow-x-auto p-5">
@@ -149,6 +159,12 @@
                   class="hover:scale-125 transition-all cursor-pointer"
                 />
               </div>
+              <div on:click={() => viewItem(si.id)}>
+                <Fa
+                  icon={faEye}
+                  class="hover:scale-125 transition-all cursor-pointer"
+                />
+              </div>
             </div>
           </td>
         </tr>{/each}
@@ -186,6 +202,102 @@
     </div>
   {/if}
 </div>
+
+<Dialog bind:isOpen={isViewDialogOpen}>
+  {#if viewedItem}
+    <!-- content here -->
+
+    <div class="flex flex-col h-[550px] overflow-y-auto">
+      <div class="grow flex flex-col">
+        <div
+          class="m-8 p-4 border-[1.5px] rounded-sm border-gray-400 flex-grow-0"
+        >
+          <h3 class="outline-none">
+            Customer Name: {#if viewedItem.customer}
+              <!-- content here -->
+
+              {viewedItem.customer?.code || "(...)"} - {viewedItem.customer
+                ? viewedItem.customer.firstName ||
+                  "" + viewedItem.customer.lastName ||
+                  ""
+                : "(...)"}
+            {/if}
+          </h3>
+          <div class="flex gap-2">
+            <DatePicker
+              bind:value={viewedItem.date}
+              label="Invoive Date : "
+              disabled
+            />
+            <NumberField
+              bind:value={viewedItem.number}
+              label="Invoice number : "
+              disabled={true}
+            />
+          </div>
+          <TextField
+            label="Description"
+            bind:value={viewedItem.description}
+            disabled={true}
+          />
+        </div>
+
+        <div class="h-0 grow overflow-y-auto">
+          <table class="text-sm text-left rtl:text-right text-gray-500 w-full">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3"> Row number</th>
+                <th scope="col" class="px-6 py-3"> Item serial </th>
+                <th scope="col" class="px-6 py-3"> Item title</th>
+                <th scope="col" class="px-6 py-3"> Quantity </th>
+                <th scope="col" class="px-6 py-3"> Fee </th>
+                <th scope="col" class="px-6 py-3"> Price </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {#each viewedItem.invoiceItems as invItem, i}
+                <tr class="bg-white border-b">
+                  <th
+                    scope="row"
+                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex justify-center"
+                  >
+                    <div class="mr-1">
+                      <!-- <div on:click={() => moveUp(i)}>
+                      <Fa icon={faChevronUp} />
+                    </div>
+                    <div on:click={() => moveDown(i)}>
+                      <Fa icon={faChevronDown} />
+                    </div> -->
+                    </div>
+                  </th>
+                  <td class="px-6 py-4"> {invItem.item.serial} </td>
+                  <td class="px-6 py-4"> {invItem.item.title} </td>
+                  <td class="px-6 py-4">
+                    <NumberField value={invItem.quantity} disabled={true} />
+                  </td>
+                  <td class="px-6 py-4">
+                    <NumberField value={invItem.price} disabled={true} />
+                  </td>
+                  <td class="px-6 py-4">
+                    {invItem.price * invItem.quantity}
+                  </td>
+                </tr>{/each}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flex-grow-0 border-t-2 p-2 px-6 flex items-center">
+        <div class="mr-auto"></div>
+        <p class="mr-6">
+          Total price:
+          {viewedItem.totalPrice}
+        </p>
+      </div>
+    </div>
+  {/if}
+</Dialog>
 
 <style lang="postcss">
   .ops {
