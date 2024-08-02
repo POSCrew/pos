@@ -12,7 +12,4 @@
   <Route path="/login">
     <LogIn />
   </Route>
-  <Route path="/basic-data">
-
-  </Route>
 </Router>

@@ -25,7 +25,7 @@
     });
   });
 
-  let filteredCutromers: Vendor[] = $derived.by(() => {
+  let filteredVendors: Vendor[] = $derived.by(() => {
     return vendors.filter((e: Vendor) => {
       return (
         e.firstName?.toLowerCase().includes(search) ||
@@ -41,8 +41,8 @@
         if (filteredItems[0]) {
           dispatch("onItemAdd", filteredItems[0]);
           search = "";
-        } else if (filteredCutromers[0]) {
-          dispatch("onVendorSelected", filteredCutromers[0]);
+        } else if (filteredVendors[0]) {
+          dispatch("onVendorSelected", filteredVendors[0]);
           search = "";
         }
         break;
@@ -70,11 +70,11 @@
         <p class="text-gray-600 mt-[-8px] italic">{item.title}</p>
       </div>
     {/each}
-    {#each filteredCutromers as vendor, i}
+    {#each filteredVendors as vendor, i}
       <div
         class="border-[1px] rounded-sm m-1 bg-violet-100 pl-2"
         on:click={() => {
-          dispatch("onVendorSelected", filteredCutromers[i]);
+          dispatch("onVendorSelected", filteredVendors[i]);
         }}
       >
         <span class="m-0">{vendor.firstName} {vendor.lastName}</span>
